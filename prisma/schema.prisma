@@ -1,0 +1,217 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  user
+  admin
+  superadmin
+  disabled
+}
+
+enum NotificationType {
+  push
+  email
+  whatsapp
+}
+
+model Tenant {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  image        String?
+  users        User[]
+  products     Product[]
+  categories   Category[]
+  setores      Setor[]
+  subscription Subscription?
+
+  Alert    Alert[]
+  PrintLog PrintLog[]
+}
+
+model Setor {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  name       String // Nome do setor (ex: TI, Vendas, RH)
+  tenantId   String     @db.ObjectId
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  users      User[] // Relacionamento com usuários desse setor
+  categories Category[] // Relacionamento com categorias
+  printLogs  PrintLog[] // Relacionamento com PrintLog
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Alert              Alert[]
+  ProductSetorNotify ProductSetorNotify[]
+}
+
+model User {
+  id                    String             @id @default(auto()) @map("_id") @db.ObjectId
+  name                  String?
+  email                 String?            @unique
+  emailVerified         Boolean?
+  image                 String?
+  hashedPassword        String?
+  resetToken            String?
+  resetTokenExpiry      DateTime?
+  invitationToken       String?
+  invitationTokenExpiry DateTime?
+  role                  Role               @default(user)
+  status                String             @default("active")
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  tenantId              String             @db.ObjectId
+  tenant                Tenant             @relation(fields: [tenantId], references: [id])
+  setorId               String?            @db.ObjectId
+  setor                 Setor?             @relation(fields: [setorId], references: [id], onDelete: Cascade)
+  accounts              Account[]
+  logs                  UserActivityLog[]
+  pushSubscriptions     PushSubscription[]
+}
+
+model PushSubscription {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.ObjectId
+  endpoint  String   @unique // O endpoint gerado pela API de Push
+  keys      Json // As chaves públicas e privadas da notificação (p256dh e auth)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  batch        String?
+  setting      Int?
+  settingUnit  String? // Indica se é "hours" ou "days"
+  validity     Int?
+  validityUnit String?
+  status       String?
+  categoryId   String     @db.ObjectId
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  tenantId     String     @db.ObjectId
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  logs         PrintLog[]
+  alerts       Alert[]
+
+  notifiedSectors   ProductSetorNotify[] // Relacionamento com o modelo de junção
+  notificationTypes String[] // Tipos de notificação suportados (usando array de String para suportar múltiplos tipos no MongoDB)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  name                String
+  notificationEnabled Boolean   @default(false) // Indica se produtos nesta categoria ativam notificações
+  tenantId            String    @db.ObjectId
+  tenant              Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  products            Product[] // Relacionamento com produtos
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  Setor               Setor?    @relation(fields: [setorId], references: [id])
+  setorId             String?   @db.ObjectId
+}
+model ProductSetorNotify {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  setorId   String  @db.ObjectId
+  setor     Setor   @relation(fields: [setorId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+
+model Alert {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tenantId  String   @db.ObjectId
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  setorId   String?  @db.ObjectId
+  setor     Setor?   @relation(fields: [setorId], references: [id], onDelete: Cascade)
+  alertDate DateTime
+  quantity  Int
+  lotNumber String?
+  status    String   @default("pending")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PrintLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  productId String   @db.ObjectId
+  product   Product  @relation(fields: [productId], references: [id])
+  tenantId  String   @db.ObjectId
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  setorId   String?  @db.ObjectId
+  setor     Setor?   @relation(fields: [setorId], references: [id], onDelete: Cascade)
+  printedBy String
+  timestamp DateTime @default(now())
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model Plan {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String // Basic, Premium, etc.
+  maxProducts Int
+  maxUsers    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  subscriptions Subscription[] // Relacionamento com múltiplas assinaturas
+}
+
+model Subscription {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId  String   @unique @db.ObjectId
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  planId    String   @db.ObjectId
+  plan      Plan     @relation(fields: [planId], references: [id])
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model UserActivityLog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @db.ObjectId
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  timestamp DateTime @default(now())
+  metadata  Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String  @db.ObjectId
+
+  @@unique([provider, providerAccountId])
+}
