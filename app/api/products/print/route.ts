@@ -1,3 +1,5 @@
+//app/api/products/print/route.ts
+
 import prisma from '@/app/libs/prismaDb'; // Import Prisma
 import { authOptions } from '@/app/utils/authOptions'; // Import NextAuth options
 import { getServerSession } from 'next-auth/next'; // Import session handler
@@ -20,6 +22,7 @@ export async function GET(req: Request) {
       include: {
         products: {
           where: {
+            isDeleted: false,
             status: 'active', // Filtra apenas os produtos com status 'active'
           },
         },

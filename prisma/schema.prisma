@@ -76,10 +76,11 @@ model Product {
   validityUnit String?
   status       String?
   categoryId   String     @db.ObjectId
+  isDeleted    Boolean    @default(false) // Novo campo para Soft Delete
   category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   tenantId     String     @db.ObjectId
   tenant       Tenant     @relation(fields: [tenantId], references: [id])
-  logs         PrintLog[]
+  logs         PrintLog[] @relation("PrintLogToProduct")
   alerts       Alert[]
 
   notifiedSectors   ProductSetorNotify[] // Relacionamento com o modelo de junção
@@ -100,6 +101,7 @@ model Category {
   updatedAt           DateTime  @updatedAt
   setorId             String?   @db.ObjectId
 }
+
 model ProductSetorNotify {
   id        String  @id @default(auto()) @map("_id") @db.ObjectId
   productId String  @db.ObjectId
@@ -109,7 +111,6 @@ model ProductSetorNotify {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
-
 
 model Alert {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
@@ -129,7 +130,7 @@ model Alert {
 model PrintLog {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   productId String   @db.ObjectId
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation("PrintLogToProduct", fields: [productId], references: [id], onDelete: Cascade)
   tenantId  String   @db.ObjectId
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   setorId   String?  @db.ObjectId

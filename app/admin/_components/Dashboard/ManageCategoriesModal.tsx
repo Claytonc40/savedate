@@ -35,12 +35,19 @@ export default function ManageCategoriesModal() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [newCategory, setNewCategory] = useState({ name: '', notificationEnabled: false });
 
+  // Função para buscar categorias
   const fetchCategories = async () => {
     setLoading(true);
     try {
       const res = await fetch('/api/categories');
       const data = await res.json();
-      setCategories(data);
+
+      // Verificar se a resposta contém o array de categorias
+      if (Array.isArray(data.categories)) {
+        setCategories(data.categories);
+      } else {
+        toast.error('Erro: O retorno de categorias não é um array');
+      }
     } catch (error) {
       toast.error('Erro ao buscar categorias');
     } finally {
@@ -48,6 +55,7 @@ export default function ManageCategoriesModal() {
     }
   };
 
+  // Função para adicionar nova categoria
   const handleAddCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -64,7 +72,7 @@ export default function ManageCategoriesModal() {
 
       toast.success('Categoria adicionada com sucesso!');
       setNewCategory({ name: '', notificationEnabled: false });
-      fetchCategories(); // Refresh categories
+      fetchCategories(); // Atualiza as categorias após adicionar
     } catch (error) {
       toast.error('Erro ao adicionar categoria');
     } finally {
@@ -72,10 +80,11 @@ export default function ManageCategoriesModal() {
     }
   };
 
+  // Função para deletar uma categoria
   const handleDeleteCategory = async (id: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/categories/${id}`, {
+      const res = await fetch(`/api/categories?id=${id}`, {
         method: 'DELETE',
       });
 
@@ -84,7 +93,7 @@ export default function ManageCategoriesModal() {
       }
 
       toast.success('Categoria deletada com sucesso!');
-      fetchCategories(); // Refresh categories
+      fetchCategories(); // Atualiza as categorias após deletar
     } catch (error) {
       toast.error('Erro ao deletar categoria');
     } finally {
@@ -94,7 +103,7 @@ export default function ManageCategoriesModal() {
 
   useEffect(() => {
     if (isOpen) {
-      fetchCategories();
+      fetchCategories(); // Carrega categorias apenas quando o modal está aberto
     }
   }, [isOpen]);
 
@@ -150,23 +159,29 @@ export default function ManageCategoriesModal() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell>{category.name}</TableCell>
-                    <TableCell>
-                      {category.notificationEnabled ? 'Habilitado' : 'Desabilitado'}
-                    </TableCell>
-                    <TableCell>
-                      <Button
-                        variant="ghost"
-                        className="text-rose-500"
-                        onClick={() => handleDeleteCategory(category.id)}
-                      >
-                        Deletar
-                      </Button>
-                    </TableCell>
+                {categories.length > 0 ? (
+                  categories.map((category) => (
+                    <TableRow key={category.id}>
+                      <TableCell>{category.name}</TableCell>
+                      <TableCell>
+                        {category.notificationEnabled ? 'Habilitado' : 'Desabilitado'}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          className="text-rose-500"
+                          onClick={() => handleDeleteCategory(category.id)}
+                        >
+                          Deletar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3}>Nenhuma categoria encontrada</TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           )}

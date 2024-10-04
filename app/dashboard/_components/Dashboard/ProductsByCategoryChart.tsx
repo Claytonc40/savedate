@@ -1,9 +1,10 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 const COLORS = [
   '#FF8042',
@@ -56,7 +57,6 @@ export default function ProductsByCategoryChart() {
     innerRadius,
     outerRadius,
     percent,
-    index,
   }: {
     cx: number;
     cy: number;
@@ -64,7 +64,6 @@ export default function ProductsByCategoryChart() {
     innerRadius: number;
     outerRadius: number;
     percent: number;
-    index: number;
   }) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
@@ -75,17 +74,30 @@ export default function ProductsByCategoryChart() {
       <text
         x={x}
         y={y}
-        fill="white"
+        fill="hsl(var(--background))"
         textAnchor={x > cx ? 'start' : 'end'}
         dominantBaseline="central"
+        className="text-xs font-medium"
       >
         {`${(percent * 100).toFixed(0)}%`}
       </text>
     );
   };
 
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="rounded-lg bg-meta-7 p-4 text-white shadow-lg ring-1 ring-black ring-opacity-5">
+          <p className="font-medium">{payload[0].name}</p>
+          <p className="text-sm text-muted-foreground">{`${payload[0].value} produtos`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
-    <Card className="h-[500px] w-full dark:bg-black dark:text-meta-9">
+    <Card className="h-[500px] w-full">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">Produtos por Categoria</CardTitle>
       </CardHeader>
@@ -95,7 +107,7 @@ export default function ProductsByCategoryChart() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : error ? (
-          <div className="flex h-full items-center justify-center text-rose-500">{error}</div>
+          <div className="flex h-full items-center justify-center text-destructive">{error}</div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -108,13 +120,25 @@ export default function ProductsByCategoryChart() {
                 outerRadius="80%"
                 fill="#8884d8"
                 dataKey="value"
+                className="transition-all duration-300 ease-in-out"
               >
                 {categoryData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={COLORS[index % COLORS.length]}
+                    className="bg-meta-6 transition-all duration-300 ease-in-out"
+                  />
                 ))}
               </Pie>
-              <Tooltip formatter={(value, name) => [`${value} produtos`, name]} />
-              <Legend layout="vertical" align="right" verticalAlign="middle" />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                layout="vertical"
+                align="right"
+                verticalAlign="middle"
+                iconSize={12}
+                iconType="circle"
+                formatter={(value) => <span className="text-sm">{value}</span>}
+              />
             </PieChart>
           </ResponsiveContainer>
         )}

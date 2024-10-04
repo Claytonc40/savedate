@@ -290,7 +290,7 @@ export default function Users() {
       {isFetchingUsers ? (
         <Loading />
       ) : (
-        <>
+        <div>
           <Table>
             <TableCaption>Lista de todos usuários</TableCaption>
             <TableHeader>
@@ -364,7 +364,7 @@ export default function Users() {
               ))}
             </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

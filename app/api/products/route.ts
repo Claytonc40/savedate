@@ -1,3 +1,5 @@
+//app/api/products/route.ts
+
 import prisma from '@/app/libs/prismaDb'; // Import Prisma
 import { authOptions } from '@/app/utils/authOptions'; // Import NextAuth options
 import { getServerSession } from 'next-auth/next'; // Import session handler
@@ -7,18 +9,20 @@ import { NextResponse } from 'next/server';
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
 
+  // Verifica se o usuário está logado
   if (!session) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
 
   try {
-    // Fetch products based on tenantId from the session
+    // Busca os produtos com base no tenantId e filtra os que não estão deletados
     const products = await prisma.product.findMany({
       where: {
-        tenantId: session.user.tenantId, // Ensure tenantId is associated with the logged-in user
+        tenantId: session.user.tenantId, // Garantir que os produtos pertencem ao tenant do usuário logado
+        isDeleted: false, // Considera apenas produtos que não foram deletados (Soft Delete)
       },
       include: {
-        category: true, // Fetch the related category
+        category: true, // Inclui a categoria relacionada ao produto
       },
     });
 

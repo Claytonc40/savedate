@@ -30,7 +30,6 @@ export async function GET(req: Request) {
   }
 }
 
-// Função para adicionar uma nova categoria
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
 
@@ -41,16 +40,18 @@ export async function POST(request: Request) {
   try {
     const { name, notificationEnabled } = await request.json();
 
-    // Verificação de campo obrigatório
-    if (!name) {
-      return NextResponse.json({ message: 'O nome da categoria é obrigatório' }, { status: 400 });
+    if (!name || typeof name !== 'string') {
+      return NextResponse.json(
+        { message: 'Nome da categoria é obrigatório e deve ser uma string' },
+        { status: 400 },
+      );
     }
 
     const newCategory = await prisma.category.create({
       data: {
         name,
         notificationEnabled: notificationEnabled || false,
-        tenantId: session.user.tenantId, // Associa a categoria ao tenant do usuário logado
+        tenantId: session.user.tenantId,
       },
     });
 
@@ -61,7 +62,6 @@ export async function POST(request: Request) {
   }
 }
 
-// Função para atualizar uma categoria existente
 export async function PUT(request: Request) {
   const session = await getServerSession(authOptions);
 
@@ -72,10 +72,16 @@ export async function PUT(request: Request) {
   try {
     const { id, name, notificationEnabled } = await request.json();
 
-    // Verificação de campo obrigatório
-    if (!id || !name) {
+    if (!id || typeof id !== 'string') {
       return NextResponse.json(
-        { message: 'ID e nome da categoria são obrigatórios' },
+        { message: 'ID da categoria é obrigatório e deve ser uma string' },
+        { status: 400 },
+      );
+    }
+
+    if (!name || typeof name !== 'string') {
+      return NextResponse.json(
+        { message: 'Nome da categoria é obrigatório e deve ser uma string' },
         { status: 400 },
       );
     }
@@ -83,7 +89,7 @@ export async function PUT(request: Request) {
     const updatedCategory = await prisma.category.update({
       where: {
         id,
-        tenantId: session.user.tenantId, // Garantia de que o usuário só pode atualizar categorias do seu tenant
+        tenantId: session.user.tenantId,
       },
       data: {
         name,
@@ -98,7 +104,6 @@ export async function PUT(request: Request) {
   }
 }
 
-// Função para deletar uma categoria
 export async function DELETE(request: Request) {
   const session = await getServerSession(authOptions);
 
@@ -109,15 +114,18 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const categoryId = searchParams.get('id');
 
-  if (!categoryId) {
-    return NextResponse.json({ message: 'ID da categoria é obrigatório' }, { status: 400 });
+  if (!categoryId || typeof categoryId !== 'string') {
+    return NextResponse.json(
+      { message: 'ID da categoria é obrigatório e deve ser uma string' },
+      { status: 400 },
+    );
   }
 
   try {
     const deletedCategory = await prisma.category.deleteMany({
       where: {
         id: categoryId,
-        tenantId: session.user.tenantId, // Garantir que a categoria pertence ao tenant do usuário logado
+        tenantId: session.user.tenantId,
       },
     });
 

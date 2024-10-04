@@ -1,3 +1,4 @@
+//app/api/products/prints/route.ts
 import prisma from '@/app/libs/prismaDb'; // Import Prisma
 import { authOptions } from '@/app/utils/authOptions'; // Import NextAuth options
 import { getServerSession } from 'next-auth/next'; // Import session handler
@@ -19,6 +20,7 @@ export async function GET(req: Request) {
       include: {
         products: {
           where: {
+            isDeleted: false, // Ensure products are not deleted
             status: 'active', // Only fetch active products
           },
           include: {

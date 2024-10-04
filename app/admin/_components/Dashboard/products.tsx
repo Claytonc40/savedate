@@ -27,12 +27,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Minus, Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Minus, Pencil, Plus, Trash2 } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import Loading from '../Loading';
 import ManageCategoriesModal from './ManageCategoriesModal'; // Import the modal component
-import React from 'react';
 
 interface NumberInputProps {
   value: string;
@@ -146,13 +145,23 @@ export default function Products() {
     }
   };
 
+  // Função para buscar categorias
   const fetchCategories = async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/categories');
       const data = await res.json();
-      setCategories(data);
+
+      // Verificar se a resposta contém o array de categorias
+      if (Array.isArray(data.categories)) {
+        setCategories(data.categories);
+      } else {
+        toast.error('Erro: O retorno de categorias não é um array');
+      }
     } catch (error) {
       toast.error('Erro ao buscar categorias');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -248,6 +257,7 @@ export default function Products() {
 
   async function handleDeleteProduct(id: string) {
     try {
+      setLoading(true);
       const res = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
       });
@@ -260,15 +270,16 @@ export default function Products() {
       toast.success('Produto deletado com sucesso!');
     } catch (error) {
       toast.error('Erro ao deletar produto');
+    } finally {
+      setLoading(false);
     }
   }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Gestor de Produtos</h1>
         <div className="flex space-x-4">
-          {' '}
-          {/* Align buttons properly */}
           <Dialog
             open={isAddProductOpen}
             onOpenChange={(open) => {
@@ -359,11 +370,17 @@ export default function Products() {
                         <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                       <SelectContent className="bg-meta-7 text-white hover:text-meta-9">
-                        {categories.map((category) => (
-                          <SelectItem key={category.id} value={category.id}>
-                            {category.name}
+                        {Array.isArray(categories) && categories.length > 0 ? (
+                          categories.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {category.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <SelectItem disabled value={''}>
+                            Nenhuma categoria disponível
                           </SelectItem>
-                        ))}
+                        )}
                       </SelectContent>
                     </Select>
                   </div>
@@ -398,7 +415,6 @@ export default function Products() {
               </form>
             </DialogContent>
           </Dialog>
-          {/* Button to open the Manage Categories Modal */}
           <ManageCategoriesModal />
         </div>
       </div>
@@ -462,15 +478,18 @@ export default function Products() {
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" onClick={() => handleEditProduct(product)}>
-                      Editar
+                    <Button variant="ghost" size="icon" onClick={() => handleEditProduct(product)}>
+                      <Pencil className="h-4 w-4" />
+                      <span className="sr-only">Edit product</span>
                     </Button>
                     <Button
                       variant="ghost"
+                      size="icon"
                       className="text-rose-500"
                       onClick={() => handleDeleteProduct(product.id)}
                     >
-                      Delete
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete product</span>
                     </Button>
                   </TableCell>
                 </TableRow>

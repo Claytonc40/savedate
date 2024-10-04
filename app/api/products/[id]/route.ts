@@ -1,3 +1,5 @@
+//app/api/products/[id]/route.ts
+
 import prisma from '@/app/libs/prismaDb'; // Your Prisma DB instance
 import { authOptions } from '@/app/utils/authOptions'; // Your NextAuth options
 import { getServerSession } from 'next-auth/next';
@@ -16,6 +18,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   try {
     const product = await prisma.product.findFirst({
       where: {
+        isDeleted: false, // Ensure the product is not deleted
         id: productId,
         tenantId: session.user.tenantId,
       },
@@ -110,20 +113,31 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
   const productId = params.id;
 
   try {
-    const deletedProduct = await prisma.product.deleteMany({
+    // Atualizar o campo `isDeleted` para true em vez de deletar o produto
+    const updatedProduct = await prisma.product.updateMany({
       where: {
         id: productId,
-        tenantId: session.user.tenantId, // Ensure tenant security
+        tenantId: session.user.tenantId, // Garantir segurança por tenant
+        isDeleted: false, // Só atualiza se o produto não tiver sido deletado ainda
+      },
+      data: {
+        isDeleted: true, // Marcamos o produto como deletado
       },
     });
 
-    if (deletedProduct.count === 0) {
-      return NextResponse.json({ message: 'Product not found or unauthorized' }, { status: 404 });
+    if (updatedProduct.count === 0) {
+      return NextResponse.json(
+        { message: 'Produto não encontrado ou não autorizado' },
+        { status: 404 },
+      );
     }
 
-    return NextResponse.json({ message: 'Product deleted successfully' }, { status: 200 });
+    return NextResponse.json(
+      { message: 'Produto deletado com sucesso (Soft Delete)' },
+      { status: 200 },
+    );
   } catch (error) {
-    console.error('Error deleting product:', error);
-    return NextResponse.json({ message: 'Failed to delete product' }, { status: 500 });
+    console.error('Erro ao deletar o produto:', error);
+    return NextResponse.json({ message: 'Erro ao deletar o produto' }, { status: 500 });
   }
 }
