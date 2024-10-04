@@ -27,27 +27,10 @@ model Tenant {
   users        User[]
   products     Product[]
   categories   Category[]
-  setores      Setor[]
   subscription Subscription?
 
   Alert    Alert[]
   PrintLog PrintLog[]
-}
-
-model Setor {
-  id         String     @id @default(auto()) @map("_id") @db.ObjectId
-  name       String // Nome do setor (ex: TI, Vendas, RH)
-  tenantId   String     @db.ObjectId
-  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  users      User[] // Relacionamento com usuários desse setor
-  categories Category[] // Relacionamento com categorias
-  printLogs  PrintLog[] // Relacionamento com PrintLog
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  Alert              Alert[]
-  ProductSetorNotify ProductSetorNotify[]
 }
 
 model User {
@@ -68,7 +51,6 @@ model User {
   tenantId              String             @db.ObjectId
   tenant                Tenant             @relation(fields: [tenantId], references: [id])
   setorId               String?            @db.ObjectId
-  setor                 Setor?             @relation(fields: [setorId], references: [id], onDelete: Cascade)
   accounts              Account[]
   logs                  UserActivityLog[]
   pushSubscriptions     PushSubscription[]
@@ -116,7 +98,6 @@ model Category {
   products            Product[] // Relacionamento com produtos
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
-  Setor               Setor?    @relation(fields: [setorId], references: [id])
   setorId             String?   @db.ObjectId
 }
 model ProductSetorNotify {
@@ -124,7 +105,6 @@ model ProductSetorNotify {
   productId String  @db.ObjectId
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   setorId   String  @db.ObjectId
-  setor     Setor   @relation(fields: [setorId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
@@ -138,7 +118,6 @@ model Alert {
   tenantId  String   @db.ObjectId
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   setorId   String?  @db.ObjectId
-  setor     Setor?   @relation(fields: [setorId], references: [id], onDelete: Cascade)
   alertDate DateTime
   quantity  Int
   lotNumber String?
@@ -154,7 +133,6 @@ model PrintLog {
   tenantId  String   @db.ObjectId
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
   setorId   String?  @db.ObjectId
-  setor     Setor?   @relation(fields: [setorId], references: [id], onDelete: Cascade)
   printedBy String
   timestamp DateTime @default(now())
   quantity  Int

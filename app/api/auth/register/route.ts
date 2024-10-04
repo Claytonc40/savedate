@@ -1,3 +1,5 @@
+//app/api/auth/register/route.ts
+
 import prisma from '@/app/libs/prismaDb';
 import sendEmail from '@/app/utils/sendEmail';
 import bcrypt from 'bcryptjs';

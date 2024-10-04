@@ -60,7 +60,7 @@ export const authOptions: AuthOptions = {
         const isPasswordCorrect = await bcrypt.compare(credentials.password, user.hashedPassword);
 
         if (!isPasswordCorrect) {
-          throw new Error('Incorrect password');
+          throw new Error('CredentialsSignin'); // Define um nome de erro específico para senha incorreta
         }
 
         return user;
@@ -69,31 +69,27 @@ export const authOptions: AuthOptions = {
   ],
   callbacks: {
     async signIn({ user, account, profile }) {
-      // Check if the user already exists in the database
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email ?? undefined },
       });
 
       if (!existingUser) {
-        // If the user does not exist, create a new tenant and associate the user with it
         const newTenant = await prisma.tenant.create({
           data: {
-            name: `${user.name ?? 'New Tenant'}'s Tenant`, // Customize the tenant name as needed
+            name: `${user.name ?? 'New Tenant'}'s Tenant`,
           },
         });
 
-        // Create the new user and associate it with the new tenant
         const newUser = await prisma.user.create({
           data: {
             name: user.name,
             email: user.email,
             image: user.image,
-            role: 'admin', // Default role for new users
-            tenantId: newTenant.id, // Associate the user with the new tenant
+            role: 'admin',
+            tenantId: newTenant.id,
           },
         });
 
-        // Log the sign-up activity
         await prisma.userActivityLog.create({
           data: {
             userId: newUser.id,
@@ -105,7 +101,6 @@ export const authOptions: AuthOptions = {
         return true;
       }
 
-      // If the user already exists, link the provider (e.g., Google/Facebook) to the user account
       await prisma.account.upsert({
         where: {
           provider_providerAccountId: {
@@ -122,7 +117,6 @@ export const authOptions: AuthOptions = {
         update: {},
       });
 
-      // Log the sign-in activity for the existing user
       await prisma.userActivityLog.create({
         data: {
           userId: existingUser.id,
@@ -131,10 +125,9 @@ export const authOptions: AuthOptions = {
         },
       });
 
-      return true; // Allow the sign-in
+      return true;
     },
     async session({ session, token, user }) {
-      // Attach user role and tenantId to the session
       if (token.sub) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub },
@@ -153,7 +146,7 @@ export const authOptions: AuthOptions = {
   },
   session: {
     strategy: 'jwt',
-    maxAge: 24 * 60 * 60, // 24 hours in seconds
+    maxAge: 24 * 60 * 60,
   },
   debug: process.env.NODE_ENV === 'development',
   secret: process.env.SECRET,

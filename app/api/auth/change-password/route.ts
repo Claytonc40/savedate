@@ -1,3 +1,4 @@
+//app/api/auth/change-password/route.ts
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 

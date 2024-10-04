@@ -1,3 +1,5 @@
+//app/api/auth/complete-registration/route.ts
+
 import prisma from '@/app/libs/prismaDb';
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';

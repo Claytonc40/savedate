@@ -84,7 +84,14 @@ export const useAuth = (errorCb?: ErrorCb) => {
     })
       .then((cb) => {
         if (cb?.error) {
-          if (cb.error === 'email') {
+          // Verifica o erro retornado e exibe mensagem apropriada
+          if (cb.error === 'CredentialsSignin') {
+            errorCb &&
+              errorCb('password', {
+                type: 'backend',
+                message: 'Senha incorreta. Tente novamente ou redefina sua senha.',
+              });
+          } else if (cb.error === 'email') {
             errorCb &&
               errorCb('email', {
                 type: 'backend',
@@ -97,14 +104,6 @@ export const useAuth = (errorCb?: ErrorCb) => {
                 type: 'backend',
                 message:
                   'Este endereço de e-mail já está sendo usado com o login do Google. Use o login do Google novamente!',
-              });
-          }
-          if (cb.error === 'password') {
-            errorCb &&
-              errorCb('password', {
-                type: 'backend',
-                message:
-                  'Senha incorreta. Tente novamente ou redefina sua senha caso a tenha esquecido.',
               });
           }
           if (cb.error === 'not_confirmed') {

@@ -1,3 +1,4 @@
+//app/(auth)/confirm-email/page.tsx
 'use client';
 
 import Loading from '@/components/Loading/loading';
@@ -58,7 +59,7 @@ const ConfirmEmail = () => {
             <Loading />
           </p>
         ) : (
-          <>
+          <div>
             <p className="text-center text-red">Token de confirmação não encontrado na URL.</p>
             <div className="mt-6 flex justify-center">
               <Link href="/auth">
@@ -67,7 +68,7 @@ const ConfirmEmail = () => {
                 </button>
               </Link>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

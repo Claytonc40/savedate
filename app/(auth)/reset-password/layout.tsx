@@ -1,3 +1,5 @@
+//app/(auth)/reset-password/layout.tsx
+
 'use client';
 import { Toaster } from 'sonner';
 import BottomText from '../auth/components/BottomText';

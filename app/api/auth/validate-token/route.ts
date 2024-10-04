@@ -1,3 +1,5 @@
+//app/api/auth/validate-token/route.ts
+
 import prisma from '@/app/libs/prismaDb';
 import { NextResponse } from 'next/server';
 

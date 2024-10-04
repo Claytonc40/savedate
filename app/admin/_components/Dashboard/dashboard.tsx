@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <>
+    <div>
       <div className="bg-gray-100 flex h-screen">
         {/* Main Content */}
         <div className="flex flex-1 flex-col overflow-hidden">
@@ -144,7 +144,7 @@ const Dashboard: React.FC = () => {
                         <span className="text-gray-500 ml-auto text-xs">1 hora atrás</span>
                       </div>
                       <div className="flex items-center">
-                        <span className="text-red-500 mr-2">•</span>
+                        <span className="mr-2 text-rose-500">•</span>
                         <p className="text-sm">Sistema marcou 5 produtos como vencidos</p>
                         <span className="text-gray-500 ml-auto text-xs">3 horas atrás</span>
                       </div>
@@ -171,7 +171,7 @@ const Dashboard: React.FC = () => {
           </main>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

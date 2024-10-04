@@ -1,3 +1,5 @@
+//app/api/auth/reset/route.ts
+
 import prisma from '@/app/libs/prismaDb';
 import sendEmail from '@/app/utils/sendEmail';
 import crypto from 'crypto';

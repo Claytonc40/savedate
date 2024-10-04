@@ -1,3 +1,5 @@
+//app/api/auth/confirmation/route.ts
+
 import prisma from '@/app/libs/prismaDb';
 import { NextResponse } from 'next/server';
 

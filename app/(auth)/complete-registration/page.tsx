@@ -1,3 +1,5 @@
+//app/(auth)/complete-registration/page.tsx
+
 'use client'; // Certifique-se de que o código é executado no lado do cliente
 
 import { Button } from '@/components/ui/button';

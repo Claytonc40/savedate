@@ -86,11 +86,11 @@ export default function AdjustedExpiringTodayLog() {
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
           </div>
         ) : error ? (
-          <div className="text-red-500 p-4 text-center">{error}</div>
+          <div className="p-4 text-center text-rose-500">{error}</div>
         ) : expiringToday.length === 0 ? (
           <div className="p-4 text-center text-muted-foreground">Nenhum produto vencendo hoje.</div>
         ) : (
-          <>
+          <div>
             <ScrollArea className="scroll-area h-[calc(100%-2rem)]">
               <ul className="divide-gray-200 dark:divide-gray-700 divide-y">
                 {expiringToday.map((product, index) => (
@@ -132,7 +132,7 @@ export default function AdjustedExpiringTodayLog() {
                 </Button>
               </div>
             )}
-          </>
+          </div>
         )}
       </CardContent>
     </Card>

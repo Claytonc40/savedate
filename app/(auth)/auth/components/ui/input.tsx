@@ -32,9 +32,9 @@ const Input: React.FC<InputProps> = ({
         disabled={disabled}
         {...register(id, { ...validation })}
         className={clsx(
-          `text-md text-gray-900 placeholder-gray-600 ring-gray-300 peer block w-full appearance-none rounded-xl bg-transparent px-6 pb-1 pt-6 shadow-sm ring-1 ring-inset transition focus:ring-2 focus:ring-inset focus:ring-sky-600`,
+          `text-md ring-gray-300 peer block w-full appearance-none rounded-xl bg-transparent px-6 pb-1 pt-6 text-graydark placeholder-boxdark shadow-sm ring-1 ring-inset transition focus:ring-2 focus:ring-inset focus:ring-sky-600`,
           errors[id] && 'ring-rose-500',
-          disabled && 'disabled:bg-gray-100 cursor-default',
+          disabled && 'cursor-default disabled:bg-bodydark2',
         )}
         placeholder=" "
       />
@@ -45,10 +45,10 @@ const Input: React.FC<InputProps> = ({
         {label}
       </label>
       {errors[id] && errors[id]?.type === 'required' && (
-        <div className="mt-1 text-xs leading-3 text-rose-500">{label} is required</div>
+        <div className="mt-1 text-xs leading-3 text-rose-500">{label} e nescessário</div>
       )}
       {errors[id] && errors[id]?.type === 'maxLength' && (
-        <div className="mt-1 text-xs leading-3 text-rose-500">Max length exceeded</div>
+        <div className="mt-1 text-xs leading-3 text-rose-500">maximo de atigido</div>
       )}
       {errors[id] && errors[id]?.type === 'pattern' && (
         <div className="mt-1 text-xs leading-3 text-rose-500">

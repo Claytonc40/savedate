@@ -95,7 +95,7 @@ export default function ProductsByCategoryChart() {
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         ) : error ? (
-          <div className="text-red-500 flex h-full items-center justify-center">{error}</div>
+          <div className="flex h-full items-center justify-center text-rose-500">{error}</div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>

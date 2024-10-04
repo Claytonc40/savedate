@@ -6,8 +6,8 @@ import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 import FadeIn from '@/components/animation/FadeIn';
-import { Button } from '@/components/ui/button';
-import Loading from '@/components/ui/loading';
+import Loading from './components/Loading';
+import { Button } from './components/ui/button';
 import Input from './components/ui/input';
 import { useAuth } from './hooks/useAuth';
 import { emailValidation, nameValidation, passwordValidation } from './validation/validation';
@@ -205,7 +205,7 @@ const Auth = () => {
               variant="ai"
               size="full"
               disabled={loading || showMessage?.type === 'success'}
-              className="hover:bg-gradient-to-r hover:from-[#61a053] hover:to-[#61a053]"
+              className="hover:bg-gradient-to-r hover:from-[#32CD32] hover:to-[#00CED1]"
             >
               {loading && <Loading />}
               {variant}
@@ -216,7 +216,7 @@ const Auth = () => {
                 className="cursor-pointer text-sm tracking-wide text-blue-600"
               >
                 {/* criar conta  */}
-                {isLogin ? '' : 'Entre na sua conta'}
+                {isLogin ? 'Criar Conta' : 'Entre na sua conta'}
               </span>
             </div>
           </FadeIn>
