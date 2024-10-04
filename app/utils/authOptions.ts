@@ -131,6 +131,7 @@ export const authOptions: AuthOptions = {
       if (token.sub) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.sub },
+          include: { tenant: true },
         });
 
         if (session.user && dbUser) {
@@ -138,6 +139,15 @@ export const authOptions: AuthOptions = {
           session.user.role = dbUser.role;
           session.user.tenantId = dbUser.tenantId;
           session.user.image = dbUser.image;
+        }
+
+        // Adicionando a verificação da assinatura
+        if (dbUser?.tenant) {
+          const subscription = await prisma.subscription.findUnique({
+            where: { tenantId: dbUser.tenant.id },
+          });
+
+          session.user.subscriptionActive = subscription?.isActive ?? false;
         }
       }
 

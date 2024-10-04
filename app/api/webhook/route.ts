@@ -1,3 +1,4 @@
+import prisma from '@/app/libs/prismaDb';
 import stripe from '@/lib/stripe';
 import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
@@ -18,66 +19,78 @@ export async function POST(req: Request) {
     switch (event.type) {
       case 'checkout.session.completed':
         if (event.data.object.payment_status === 'paid') {
-          // pagagamento por cartão com sucesso
-          const testeId = event.data.object.metadata?.testeId;
-          console.log('pagagamento por cartão com sucesso', testeId);
-        }
+          const tenantId = event.data.object.metadata?.tenantId;
+          const planId = event.data.object.metadata?.planId;
+          console.log('Checkout completed', tenantId, planId);
 
-        if (event.data.object.payment_status === 'unpaid' && event.data.object.payment_intent) {
-          // Pagamento por boleto
-          const paymentIntent = await stripe.paymentIntents.retrieve(
-            event.data.object.payment_intent.toString(),
-          );
+          if (tenantId && planId) {
+            const existingSubscription = await prisma.subscription.findUnique({
+              where: { tenantId },
+            });
 
-          const hostedVoucherUrl =
-            paymentIntent.next_action?.boleto_display_details?.hosted_voucher_url;
+            if (existingSubscription) {
+              await prisma.subscription.update({
+                where: { tenantId },
+                data: {
+                  planId,
+                  startDate: new Date(),
+                  endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+                  isActive: true,
+                },
+              });
+            } else {
+              await prisma.subscription.create({
+                data: {
+                  tenantId,
+                  planId,
+                  startDate: new Date(),
+                  endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+                  isActive: true,
+                },
+              });
+            }
 
-          if (hostedVoucherUrl) {
-            // O cliente gerou um boleto, manda um email pra ele
-            const userEmail = event.data.object.customer_details?.email;
-            console.log('gerou o boleto e o link é', hostedVoucherUrl);
+            console.log('Subscription created/updated successfully for tenant', tenantId);
           }
-        }
-        break;
-
-      case 'checkout.session.expired':
-        if (event.data.object.payment_status === 'unpaid') {
-          // O cliente saiu do checkout e expirou :(
-          const testeId = event.data.object.metadata?.testeId;
-          console.log('checkout expirado', testeId);
         }
         break;
 
       case 'checkout.session.async_payment_succeeded':
         if (event.data.object.payment_status === 'paid') {
-          // O cliente pagou o boleto e o pagamento foi confirmado
-          const testeId = event.data.object.metadata?.testeId;
-          console.log('pagamento boleto confirmado', testeId);
+          const tenantId = event.data.object.metadata?.tenantId;
+
+          if (tenantId) {
+            await prisma.subscription.update({
+              where: { tenantId },
+              data: { isActive: true },
+            });
+
+            console.log('Boleto payment confirmed', tenantId);
+          }
         }
         break;
 
       case 'checkout.session.async_payment_failed':
         if (event.data.object.payment_status === 'unpaid') {
-          // O cliente não pagou o boleto e ele venceu :(
-          const testeId = event.data.object.metadata?.testeId;
-          console.log('pagamento boleto falhou', testeId);
+          const tenantId = event.data.object.metadata?.tenantId;
+          console.log('Boleto payment failed', tenantId);
         }
         break;
 
       case 'customer.subscription.deleted':
-        // O cliente cancelou o plano :(
+        const subscriptionId = event.data.object.id;
+        await prisma.subscription.update({
+          where: { id: subscriptionId },
+          data: { isActive: false },
+        });
+
+        console.log('Subscription cancelled', subscriptionId);
         break;
     }
 
     return NextResponse.json({ result: event, ok: true });
   } catch (error) {
     console.error(error);
-    return NextResponse.json(
-      {
-        message: `Webhook error: ${error}`,
-        ok: false,
-      },
-      { status: 500 },
-    );
+    return NextResponse.json({ message: `Webhook error: ${error}`, ok: false }, { status: 500 });
   }
 }

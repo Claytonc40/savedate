@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import React from 'react';
 import { useState } from 'react';
 import { FaQuestionCircle } from 'react-icons/fa';
 import Joyride from 'react-joyride'; // Importando o React Joyride
