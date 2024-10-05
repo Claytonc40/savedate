@@ -47,7 +47,6 @@ export async function POST(request: Request) {
 
     return NextResponse.json('Senha atualizada com sucesso', { status: 200 });
   } catch (error) {
-  
     return NextResponse.json('Internal Error', { status: 500 });
   }
 }
