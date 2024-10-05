@@ -79,7 +79,7 @@ export default function PricingPage() {
                 'Sua marca nas etiquetas',
                 'Suporte Prioritário',
               ]}
-              onClick={() => handleClick('67007e4bf32c1291843d767d', true)}
+              onClick={() => handleClick('670098147ece88f48c1134ac', true)}
             />
             {/* <PricingCard
               title="ELITE"
