@@ -283,6 +283,7 @@ export default function Products() {
           <Dialog
             open={isAddProductOpen}
             onOpenChange={(open) => {
+              fetchCategories();
               setIsAddProductOpen(open);
               if (!open) handleCloseProductModal();
             }}

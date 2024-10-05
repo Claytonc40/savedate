@@ -1,6 +1,8 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Check, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface PricingCardProps {
   title: string;
@@ -9,6 +11,7 @@ interface PricingCardProps {
   disabledFeatures?: string[];
   isRecommended?: boolean;
   ctaText?: string;
+  loginRedirectUrl?: string; // New prop for the login redirection URL
 }
 
 export default function PricingCard({
@@ -18,7 +21,14 @@ export default function PricingCard({
   disabledFeatures = [],
   isRecommended = false,
   ctaText = 'COMEÇAR',
+  loginRedirectUrl = '/auth', // Default login page URL
 }: PricingCardProps) {
+  const router = useRouter();
+
+  const handleButtonClick = () => {
+    router.push(loginRedirectUrl); // Redirect to the login page
+  };
+
   return (
     <Card
       className={`flex flex-col text-white ${isRecommended ? 'border-4 border-yellow-400' : ''}`}
@@ -57,7 +67,9 @@ export default function PricingCard({
         </ul>
       </CardContent>
       <CardFooter>
-        <Button className="w-full text-white">{ctaText}</Button>
+        <Button className="w-full text-white" onClick={handleButtonClick}>
+          {ctaText}
+        </Button>
       </CardFooter>
     </Card>
   );

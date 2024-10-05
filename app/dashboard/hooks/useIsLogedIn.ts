@@ -15,7 +15,7 @@ const useIsLogedIn = () => {
 
     if (status === 'authenticated') {
       // Verificar se a assinatura é válida ou se o usuário não tem assinatura
-      const isSubscriptionValid = session?.user?.subscription?.isActive;
+      const isSubscriptionValid = session?.user?.subscriptionActive;
       const subscriptionExpired = session?.user?.subscription?.isExpired;
 
       if (!isSubscriptionValid || subscriptionExpired) {
@@ -27,5 +27,4 @@ const useIsLogedIn = () => {
 
   return { session, loading: status === 'loading' };
 };
-
 export { useIsLogedIn };

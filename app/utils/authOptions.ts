@@ -140,7 +140,6 @@ export const authOptions: AuthOptions = {
           session.user.tenantId = dbUser.tenantId;
           session.user.image = dbUser.image;
         }
-
         // Adicionando a verificação da assinatura
         if (dbUser?.tenant) {
           const subscription = await prisma.subscription.findUnique({

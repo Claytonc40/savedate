@@ -10,8 +10,8 @@ export default function PricingPage() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <h1 className="mb-8 text-center text-4xl font-bold">Planos e Preços</h1>
           <p className="mb-12 text-center text-xl">Escolha o plano perfeito para o seu negócio</p>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <PricingCard
+          <div className="flex grid-cols-1 items-center justify-center gap-8 md:grid-cols-3">
+            {/* <PricingCard
               title="STANDARD"
               price="99"
               features={[
@@ -25,7 +25,7 @@ export default function PricingPage() {
                 'Suporte a impressão',
                 'Sua marca nas etiquetas',
               ]}
-            />
+            /> */}
             <PricingCard
               title="PREMIUM"
               price="199"

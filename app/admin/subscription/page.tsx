@@ -12,6 +12,7 @@ export default function PricingPage() {
 
   const isSubscriptionValid = session?.user?.subscription?.isActive;
 
+  console.log(isSubscriptionValid);
   useEffect(() => {
     if (isSubscriptionValid) {
       // Exibe modal de assinatura ou redireciona
@@ -48,7 +49,7 @@ export default function PricingPage() {
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <h1 className="mb-8 text-center text-4xl font-bold">Planos e Preços</h1>
           <p className="mb-12 text-center text-xl">Escolha o plano perfeito para o seu negócio</p>
-          <div className="grid grid-cols-1 items-center justify-center gap-8 md:grid-cols-3">
+          <div className="flex grid-cols-1 items-center justify-center gap-8 md:grid-cols-3">
             {/* <PricingCard
               title="STANDARD"
               price="99"
@@ -78,9 +79,9 @@ export default function PricingPage() {
                 'Sua marca nas etiquetas',
                 'Suporte Prioritário',
               ]}
-              onClick={() => handleClick('premium-plan-id', true)}
+              onClick={() => handleClick('67007e4bf32c1291843d767d', true)}
             />
-            <PricingCard
+            {/* <PricingCard
               title="ELITE"
               price="Personalizado"
               features={[
@@ -91,9 +92,9 @@ export default function PricingPage() {
                 'Treinamento Dedicado',
                 'SLA Garantido',
               ]}
-              onClick={() => handleClick('elite-plan-id', true)}
+              onClick={() => handleClick('67007e4bf32c1291843d767d', true)}
               ctaText="ENTRAR EM CONTATO"
-            />
+            /> */}
           </div>
         </div>
       </main>

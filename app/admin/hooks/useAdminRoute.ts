@@ -11,10 +11,11 @@ const useAdminRoute = (redirectTo = '/auth') => {
   useEffect(() => {
     // Wait until the session is checked
     if (status === 'loading') return;
-    const isSubscriptionValid = session?.user?.subscription?.isActive;
+    const isSubscriptionValid = session?.user?.subscriptionActive;
     const subscriptionExpired = session?.user?.subscription?.isExpired;
 
     // Redirect if not logged in or not an admin
+
     if (!session || session.user.role !== 'admin') {
       router.push(redirectTo);
     } else {

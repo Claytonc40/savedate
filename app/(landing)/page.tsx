@@ -11,8 +11,8 @@ export default function PricingPage() {
         <div className="w-full max-w-6xl space-y-8">
           <h1 className="mb-4 text-center text-4xl font-bold text-white md:text-6xl">Save Date</h1>
           <h2 className="mb-8 text-center text-2xl font-semibold text-white md:text-4xl">Planos</h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-            <PricingCard
+          <div className="flex grid-cols-1 items-center justify-center gap-8 md:grid-cols-3">
+            {/* <PricingCard
               title="STANDARD"
               price="99"
               features={[
@@ -26,7 +26,7 @@ export default function PricingPage() {
                 'Suporte a impressão',
                 'Sua marca nas etiquetas',
               ]}
-            />
+            /> */}
             <PricingCard
               title="PREMIUM"
               price="199"
