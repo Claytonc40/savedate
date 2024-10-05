@@ -12,7 +12,6 @@ export default function PricingPage() {
 
   const isSubscriptionValid = session?.user?.subscription?.isActive;
 
-  console.log(isSubscriptionValid);
   useEffect(() => {
     if (isSubscriptionValid) {
       // Exibe modal de assinatura ou redireciona
@@ -20,10 +19,10 @@ export default function PricingPage() {
     }
   }, [isSubscriptionValid]);
 
-  const handleClick = async (planId: string, isSubscription: boolean) => {
+  const handleClick = async (planId: string, tenantId: string, isSubscription: boolean) => {
     try {
       setIsCreatingCheckout(true);
-      const checkoutResponse = await fetch('/api/checkout', {
+      const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,14 +30,18 @@ export default function PricingPage() {
         body: JSON.stringify({ planId, tenantId, isSubscription }),
       });
 
+      const data = await response.json();
+
+      if (!response.ok || !data.sessionId) {
+        throw new Error(data.error || 'Failed to create checkout session');
+      }
+
       const stripeClient = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUB_KEY as string);
+      if (!stripeClient) throw new Error('Stripe client load failed');
 
-      if (!stripeClient) throw new Error('Failed to load Stripe client');
-
-      const { sessionId } = await checkoutResponse.json();
-      await stripeClient.redirectToCheckout({ sessionId });
+      await stripeClient.redirectToCheckout({ sessionId: data.sessionId });
     } catch (error) {
-      console.error('Failed to create checkout session', error);
+      console.error('Failed to create checkout session:', error);
       setIsCreatingCheckout(false);
     }
   };
@@ -79,7 +82,7 @@ export default function PricingPage() {
                 'Sua marca nas etiquetas',
                 'Suporte Prioritário',
               ]}
-              onClick={() => handleClick('670098147ece88f48c1134ac', true)}
+              onClick={() => handleClick('670098147ece88f48c1134ac', tenantId, true)}
             />
             {/* <PricingCard
               title="ELITE"

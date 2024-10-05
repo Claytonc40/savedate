@@ -20,8 +20,7 @@ export const useAuth = (errorCb?: ErrorCb) => {
 
     signIn(action, { redirect: false }).then((cb) => {
       if (cb?.error) {
-        //! Add Global Error
-        console.log('error', cb?.error);
+   
       }
       if (cb?.ok && !cb?.error) {
         router.push('/dashboard');
