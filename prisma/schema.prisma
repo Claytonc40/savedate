@@ -194,3 +194,45 @@ model Account {
 
   @@unique([provider, providerAccountId])
 }
+
+model PrinterConfig {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId // Identificador único da configuração
+  tenantId              String   @map("_tenantId") @db.ObjectId // Relacionado ao tenant, não mais único
+  name                  String   @map("_name") // Nome da configuração
+  paperSize             String   // Tamanho do papel (ex: A4, A5, Carta, Personalizado)
+  labelWidth            Float    // Largura da etiqueta (em milímetros)
+  labelHeight           Float    // Altura da etiqueta (em milímetros)
+  marginTop             Float    // Margem superior da folha (espaço entre o topo da página e a primeira etiqueta)
+  horizontalSpacing     Float    // Distância entre as etiquetas na horizontal (espaço entre as etiquetas lado a lado)
+  verticalSpacing       Float    // Distância entre as etiquetas na vertical (espaço entre as etiquetas uma embaixo da outra)
+  marginBottom          Float    // Margem inferior da folha (espaço entre a última etiqueta e o fim da página)
+  marginLeft            Float    // Margem esquerda da folha (espaço entre o lado esquerdo da página e a primeira etiqueta)
+  marginRight           Float    // Margem direita da folha (espaço entre o lado direito da página e a última etiqueta)
+  fontSize              Float    // Tamanho da fonte nas etiquetas
+  fontFamily            String   // Tipo de fonte usada nas etiquetas (ex: Arial, Times New Roman)
+  fontColor             String   // Cor da fonte (ex: #000000 para preto)
+  boldText              Boolean  // Define se o texto será negrito (bold)
+  italicText            Boolean  // Define se o texto será itálico
+  rotation              Float    // Ângulo de rotação das etiquetas (ex: 90, 180 graus)
+  barcodeEnabled        Boolean  // Define se o código de barras estará habilitado nas etiquetas
+  barcodeType           String   // Tipo de código de barras (ex: QR Code, Code 128)
+  barcodePosition       String   // Posição do código de barras na etiqueta (acima, abaixo, centro)
+  labelBorder           Boolean  // Define se as etiquetas terão bordas
+  borderColor           String   // Cor da borda da etiqueta (ex: #FF0000 para vermelho)
+  backgroundColor       String   // Cor de fundo da etiqueta (ex: #FFFFFF para branco)
+  customImageEnabled    Boolean  // Define se uma imagem personalizada pode ser adicionada na etiqueta
+  imagePosition         String   // Posição da imagem personalizada na etiqueta (ex: esquerda, direita, centro)
+  imageOpacity          Float    // Opacidade da imagem personalizada (0.0 a 1.0)
+  numberOfLabelsPerPage Int      // Número total de etiquetas que cabem por página
+  cutLineEnabled        Boolean  // Define se uma linha de corte será impressa ao redor das etiquetas
+  useCustomMargins      Boolean  // Define se as margens personalizadas estarão habilitadas
+  logoWidth             Float    // Largura da logo da empresa na etiqueta
+  logoHeight            Float    // Altura da logo da empresa na etiqueta
+  logoTop               Float    // Posição da logo a partir do topo da etiqueta
+  logoLeft              Float    // Posição da logo a partir do lado esquerdo da etiqueta
+  labelsPerRow          Int      // Número de etiquetas por linha
+  labelsPerColumn       Int      // Número de etiquetas por coluna
+  createdAt             DateTime @default(now())  // Data e hora em que a configuração foi criada
+  updatedAt             DateTime @updatedAt       // Data e hora da última atualização da configuração
+}
+
