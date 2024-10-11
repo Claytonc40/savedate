@@ -28,6 +28,7 @@ export async function GET(request: Request) {
   }
 }
 
+// Rota PUT: Atualizar configuração de impressora pelo id
 export async function PUT(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -38,7 +39,7 @@ export async function PUT(request: Request) {
 
   try {
     const {
-      name,
+      id, // Agora o `id` da impressora será passado
       paperSize,
       labelWidth,
       labelHeight,
@@ -74,95 +75,45 @@ export async function PUT(request: Request) {
       labelsPerColumn = 7,
     } = await request.json();
 
-    // Verifica se já existe uma configuração com o tenantId e name
-    const existingConfig = await prisma.printerConfig.findFirst({
-      where: { tenantId, name },
+    // Atualiza a configuração existente pelo ID passado
+    const updatedConfig = await prisma.printerConfig.update({
+      where: { id }, // Atualiza diretamente pelo id da configuração
+      data: {
+        paperSize,
+        labelWidth,
+        labelHeight,
+        marginTop,
+        horizontalSpacing,
+        verticalSpacing,
+        marginBottom,
+        marginLeft,
+        marginRight,
+        fontSize,
+        fontFamily,
+        fontColor,
+        boldText,
+        italicText,
+        rotation,
+        barcodeEnabled,
+        barcodeType,
+        barcodePosition,
+        labelBorder,
+        borderColor,
+        backgroundColor,
+        customImageEnabled,
+        imagePosition,
+        imageOpacity,
+        numberOfLabelsPerPage,
+        cutLineEnabled,
+        useCustomMargins,
+        logoWidth,
+        logoHeight,
+        logoTop,
+        logoLeft,
+        labelsPerRow,
+        labelsPerColumn,
+      },
     });
-
-    let updatedConfig;
-
-    if (existingConfig) {
-      // Atualiza a configuração existente
-      updatedConfig = await prisma.printerConfig.update({
-        where: { id: existingConfig.id }, // Usa o id único da configuração
-        data: {
-          paperSize,
-          labelWidth,
-          labelHeight,
-          marginTop,
-          horizontalSpacing,
-          verticalSpacing,
-          marginBottom,
-          marginLeft,
-          marginRight,
-          fontSize,
-          fontFamily,
-          fontColor,
-          boldText,
-          italicText,
-          rotation,
-          barcodeEnabled,
-          barcodeType,
-          barcodePosition,
-          labelBorder,
-          borderColor,
-          backgroundColor,
-          customImageEnabled,
-          imagePosition,
-          imageOpacity,
-          numberOfLabelsPerPage,
-          cutLineEnabled,
-          useCustomMargins,
-          logoWidth,
-          logoHeight,
-          logoTop,
-          logoLeft,
-          labelsPerRow,
-          labelsPerColumn,
-        },
-      });
-    } else {
-      // Cria uma nova configuração
-      updatedConfig = await prisma.printerConfig.create({
-        data: {
-          tenantId,
-          name,
-          paperSize,
-          labelWidth,
-          labelHeight,
-          marginTop,
-          horizontalSpacing,
-          verticalSpacing,
-          marginBottom,
-          marginLeft,
-          marginRight,
-          fontSize,
-          fontFamily,
-          fontColor,
-          boldText,
-          italicText,
-          rotation,
-          barcodeEnabled,
-          barcodeType,
-          barcodePosition,
-          labelBorder,
-          borderColor,
-          backgroundColor,
-          customImageEnabled,
-          imagePosition,
-          imageOpacity,
-          numberOfLabelsPerPage,
-          cutLineEnabled,
-          useCustomMargins,
-          logoWidth,
-          logoHeight,
-          logoTop,
-          logoLeft,
-          labelsPerRow,
-          labelsPerColumn,
-        },
-      });
-    }
 
     return NextResponse.json(updatedConfig, { status: 200 });
   } catch (error: any) {
@@ -171,7 +122,7 @@ export async function PUT(request: Request) {
   }
 }
 
-// Rota DELETE: Excluir uma configuração de impressora
+// Rota DELETE: Excluir uma configuração de impressora pelo id
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
   if (!session) {
@@ -247,8 +198,8 @@ export async function POST(request: Request) {
       logoHeight,
       logoTop,
       logoLeft,
-      labelsPerRow, // Campo novo para etiquetas por linha
-      labelsPerColumn, // Campo novo para etiquetas por coluna
+      labelsPerRow,
+      labelsPerColumn,
     } = await request.json();
 
     const newConfig = await prisma.printerConfig.create({

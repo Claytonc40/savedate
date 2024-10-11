@@ -25,7 +25,6 @@ import { useReactToPrint } from 'react-to-print';
 import { toast } from 'sonner';
 import Loading from '../_components/Loading';
 
-// Função para formatar data e hora
 const formatDateTime = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
@@ -94,11 +93,11 @@ export default function ProductLabelPrinter() {
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [printerConfig, setPrinterConfig] = useState<PrinterConfig[]>([]);
+  const [printerConfig, setPrinterConfig] = useState<PrinterConfig[]>([]); // Garante que seja sempre um array
   const [selectedPrinter, setSelectedPrinter] = useState<string | null>(null);
   const componentRef = useRef<HTMLDivElement>(null);
-  const [fields, setFields] = useState<string[]>([]); // Campos personalizados para adicionar nas etiquetas
-  const [newField, setNewField] = useState(''); // Estado para o novo campo
+  const [fields, setFields] = useState<string[]>([]);
+  const [newField, setNewField] = useState('');
 
   useEffect(() => {
     const fetchConfigs = async () => {
@@ -106,7 +105,14 @@ export default function ProductLabelPrinter() {
       try {
         const response = await fetch('/api/printer-config');
         const data = await response.json();
-        setPrinterConfig(data);
+
+        if (Array.isArray(data) && data.length > 0) {
+          setPrinterConfig(data);
+          setSelectedPrinter(data[0].id); // Seta o primeiro printer como padrão
+        } else {
+          setPrinterConfig([]);
+          setSelectedPrinter(null); // Nenhuma impressora disponível
+        }
       } catch (error) {
         toast.error('Erro ao buscar configurações de impressão');
       } finally {
@@ -185,7 +191,6 @@ export default function ProductLabelPrinter() {
         }
       }
 
-      // Clona o conteúdo e aplica à área de impressão
       for (let i = 0; i < quantity; i++) {
         const clone = componentRef.current?.cloneNode(true);
         if (clone) {
@@ -295,6 +300,7 @@ export default function ProductLabelPrinter() {
                     <SelectValue placeholder="Selecione uma impressora" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="none">Selecione uma impressora</SelectItem>
                     {printerConfig.map((printer) => (
                       <SelectItem key={printer.id} value={printer.id}>
                         {printer.name}
