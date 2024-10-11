@@ -202,9 +202,10 @@ export async function POST(request: Request) {
       logoLeft,
       labelsPerRow,
       labelsPerColumn,
-      lineHeight,
+      lineHeight, // Novo campo para espaçamento entre linhas
     } = await request.json();
 
+    // Criação da nova configuração
     const newConfig = await prisma.printerConfig.create({
       data: {
         tenantId,
@@ -242,13 +243,16 @@ export async function POST(request: Request) {
         logoLeft,
         labelsPerRow,
         labelsPerColumn,
-        lineHeight,
+        lineHeight, // Inclui o novo campo
       },
     });
 
     return NextResponse.json(newConfig, { status: 201 });
   } catch (error: any) {
-    console.error('Error creating configuration:', error);
-    return NextResponse.json({ error: 'Error creating configuration' }, { status: 500 });
+    console.error('Erro ao criar a nova configuração:', error);
+    return NextResponse.json(
+      { error: `Erro ao criar a nova configuração: ${error.message}` },
+      { status: 500 },
+    );
   }
 }

@@ -25,7 +25,7 @@ export default function GeneralSettings({ config, onChange }: any) {
             <SelectTrigger id="paperSize">
               <SelectValue placeholder="Selecione o tamanho do papel" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-meta-6 text-white">
               <SelectItem value="A4">A4</SelectItem>
               <SelectItem value="A5">A5</SelectItem>
               <SelectItem value="Letter">Carta</SelectItem>
@@ -54,7 +54,7 @@ export default function GeneralSettings({ config, onChange }: any) {
           <SelectTrigger id="cutLineEnabled">
             <SelectValue placeholder="Habilitar linha de corte?" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-meta-6 text-white">
             <SelectItem value="true">Habilitado</SelectItem>
             <SelectItem value="false">Desabilitado</SelectItem>
           </SelectContent>

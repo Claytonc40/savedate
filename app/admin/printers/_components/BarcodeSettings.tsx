@@ -35,7 +35,7 @@ export default function BarcodeSettings({ config, onChange }: any) {
               <SelectTrigger id="barcodeType">
                 <SelectValue placeholder="Selecione o tipo de código de barras" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-meta-6 text-white">
                 <SelectItem value="QR Code">QR Code</SelectItem>
                 <SelectItem value="Code 128">Code 128</SelectItem>
                 <SelectItem value="EAN-13">EAN-13</SelectItem>
@@ -52,7 +52,7 @@ export default function BarcodeSettings({ config, onChange }: any) {
               <SelectTrigger id="barcodePosition">
                 <SelectValue placeholder="Selecione a posição do código de barras" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-meta-6 text-white">
                 <SelectItem value="Above">Acima</SelectItem>
                 <SelectItem value="Below">Abaixo</SelectItem>
                 <SelectItem value="Center">Centro</SelectItem>

@@ -25,7 +25,6 @@ import FontSettings from './_components/FontSettings';
 import GeneralSettings from './_components/GeneralSettings';
 import ImageSettings from './_components/ImageSettings';
 import LabelSettings from './_components/LabelSettings';
-import React from 'react';
 
 type PrinterConfig = {
   id: string;
@@ -64,6 +63,7 @@ type PrinterConfig = {
   logoHeight: number;
   logoTop: number;
   logoLeft: number;
+  lineHeight: number; // Novo campo
 };
 
 export default function PrinterConfigPage() {
@@ -151,6 +151,7 @@ export default function PrinterConfigPage() {
       logoHeight: 50,
       logoTop: 10,
       logoLeft: 10,
+      lineHeight: 10,
     };
 
     try {
@@ -233,7 +234,7 @@ export default function PrinterConfigPage() {
                     <SelectTrigger id="config-select">
                       <SelectValue placeholder="Selecione uma configuração" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-meta-6 text-white">
                       {configs.map((config) => (
                         <SelectItem key={config.id} value={config.id}>
                           {config.name}

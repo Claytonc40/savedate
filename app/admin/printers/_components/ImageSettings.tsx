@@ -36,7 +36,7 @@ export default function ImageSettings({ config, onChange }: any) {
               <SelectTrigger id="imagePosition">
                 <SelectValue placeholder="Selecione a posição da imagem" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-meta-6 text-white">
                 <SelectItem value="Left">Esquerda</SelectItem>
                 <SelectItem value="Right">Direita</SelectItem>
                 <SelectItem value="Center">Centro</SelectItem>
