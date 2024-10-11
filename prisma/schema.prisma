@@ -232,6 +232,7 @@ model PrinterConfig {
   logoLeft              Float    // Posição da logo a partir do lado esquerdo da etiqueta
   labelsPerRow          Int      // Número de etiquetas por linha
   labelsPerColumn       Int      // Número de etiquetas por coluna
+   lineHeight            Float    // Espaçamento entre linhas, valor padrão 1.5
   createdAt             DateTime @default(now())  // Data e hora em que a configuração foi criada
   updatedAt             DateTime @updatedAt       // Data e hora da última atualização da configuração
 }

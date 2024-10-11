@@ -35,7 +35,7 @@ export default function FontSettings({ config, onChange }: any) {
             <SelectTrigger id="fontFamily">
               <SelectValue placeholder="Selecione a família da fonte" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-meta-7 text-white">
               <SelectItem value="Arial">Arial</SelectItem>
               <SelectItem value="Times New Roman">Times New Roman</SelectItem>
               <SelectItem value="Courier">Courier</SelectItem>
@@ -44,6 +44,7 @@ export default function FontSettings({ config, onChange }: any) {
           </Select>
         </div>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="fontColor">Cor da Fonte</Label>
         <Input
@@ -53,6 +54,7 @@ export default function FontSettings({ config, onChange }: any) {
           onChange={(e) => handleChange('fontColor', e.target.value)}
         />
       </div>
+
       <div className="flex items-center space-x-4">
         <div className="flex items-center space-x-2">
           <Switch
@@ -71,6 +73,7 @@ export default function FontSettings({ config, onChange }: any) {
           <Label htmlFor="italicText">Itálico</Label>
         </div>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="rotation">Rotação do Texto (graus)</Label>
         <Input
@@ -78,6 +81,18 @@ export default function FontSettings({ config, onChange }: any) {
           type="number"
           value={config?.rotation || 0}
           onChange={(e) => handleChange('rotation', parseFloat(e.target.value))}
+        />
+      </div>
+
+      {/* Campo para espaçamento entre linhas */}
+      <div className="space-y-2">
+        <Label htmlFor="lineHeight">Espaçamento entre Linhas</Label>
+        <Input
+          id="lineHeight"
+          type="number"
+          value={config?.lineHeight || 1.5} // Valor padrão 1.5
+          onChange={(e) => handleChange('lineHeight', parseFloat(e.target.value))}
+          step="0.1" // Incremento de 0.1 para mais controle sobre o espaçamento
         />
       </div>
     </div>

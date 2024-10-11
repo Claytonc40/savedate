@@ -1,5 +1,4 @@
 'use client';
-
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -25,6 +24,7 @@ import { useReactToPrint } from 'react-to-print';
 import { toast } from 'sonner';
 import Loading from '../_components/Loading';
 
+// Função para formatar data e hora
 const formatDateTime = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
@@ -80,6 +80,7 @@ interface PrinterConfig {
   logoLeft: number;
   labelsPerRow: number;
   labelsPerColumn: number;
+  lineHeight: number; // Adicionado para espaçamento entre linhas
 }
 
 export default function ProductLabelPrinter() {
@@ -93,7 +94,7 @@ export default function ProductLabelPrinter() {
   const [isLoading, setIsLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [printerConfig, setPrinterConfig] = useState<PrinterConfig[]>([]); // Garante que seja sempre um array
+  const [printerConfig, setPrinterConfig] = useState<PrinterConfig[]>([]);
   const [selectedPrinter, setSelectedPrinter] = useState<string | null>(null);
   const componentRef = useRef<HTMLDivElement>(null);
   const [fields, setFields] = useState<string[]>([]);
@@ -108,10 +109,10 @@ export default function ProductLabelPrinter() {
 
         if (Array.isArray(data) && data.length > 0) {
           setPrinterConfig(data);
-          setSelectedPrinter(data[0].id); // Seta o primeiro printer como padrão
+          setSelectedPrinter(data[0].id);
         } else {
           setPrinterConfig([]);
-          setSelectedPrinter(null); // Nenhuma impressora disponível
+          setSelectedPrinter(null);
         }
       } catch (error) {
         toast.error('Erro ao buscar configurações de impressão');
@@ -152,52 +153,75 @@ export default function ProductLabelPrinter() {
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
 
+      // Busca a configuração da impressora selecionada
       const printer = printerConfig.find((p) => p.id === selectedPrinter);
 
-      if (printer) {
-        printContainer.style.display = 'grid';
-        printContainer.style.gridTemplateColumns = `repeat(${printer.labelsPerRow}, ${printer.labelWidth}mm)`;
-        printContainer.style.gridTemplateRows = `repeat(${printer.labelsPerColumn}, ${printer.labelHeight}mm)`;
-        printContainer.style.gap = `${printer.verticalSpacing}mm ${printer.horizontalSpacing}mm`;
-
-        printContainer.style.fontSize = `${printer.fontSize}px`;
-        printContainer.style.fontFamily = printer.fontFamily;
-        printContainer.style.color = printer.fontColor;
-        printContainer.style.fontWeight = printer.boldText ? 'bold' : 'normal';
-        printContainer.style.fontStyle = printer.italicText ? 'italic' : 'normal';
-        printContainer.style.marginTop = `${printer.marginTop}mm`;
-        printContainer.style.marginBottom = `${printer.marginBottom}mm`;
-        printContainer.style.marginLeft = `${printer.marginLeft}mm`;
-        printContainer.style.marginRight = `${printer.marginRight}mm`;
-        printContainer.style.backgroundColor = printer.backgroundColor;
-        printContainer.style.transform = `rotate(${printer.rotation}deg)`;
-
-        if (printer.labelBorder) {
-          printContainer.style.border = `1px solid ${printer.borderColor}`;
-        }
-        if (printer.cutLineEnabled) {
-          printContainer.style.borderStyle = 'dotted';
-        }
-        if (printer.customImageEnabled && tenantImage) {
-          const logo = document.createElement('img');
-          logo.src = tenantImage;
-          logo.style.position = 'absolute';
-          logo.style.width = `${printer.logoWidth}px`;
-          logo.style.height = `${printer.logoHeight}px`;
-          logo.style.top = `${printer.logoTop}px`;
-          logo.style.left = `${printer.logoLeft}px`;
-          logo.style.opacity = `${printer.imageOpacity}`;
-          printContainer.appendChild(logo);
-        }
+      // Verifica se a impressora foi encontrada antes de continuar
+      if (!printer) {
+        toast.error('Erro: Impressora não encontrada');
+        return printContainer;
       }
 
+      // Configurações da impressora selecionada
+      printContainer.style.display = 'grid';
+      printContainer.style.gridTemplateColumns = `repeat(${printer.labelsPerRow}, ${printer.labelWidth}mm)`;
+      printContainer.style.gridTemplateRows = `repeat(${printer.labelsPerColumn}, ${printer.labelHeight}mm)`;
+      printContainer.style.gap = `${printer.verticalSpacing}mm ${printer.horizontalSpacing}mm`;
+
+      printContainer.style.fontSize = `${printer.fontSize}px`;
+      printContainer.style.fontFamily = printer.fontFamily;
+      printContainer.style.color = printer.fontColor;
+      printContainer.style.fontWeight = printer.boldText ? 'bold' : 'normal';
+      printContainer.style.fontStyle = printer.italicText ? 'italic' : 'normal';
+      printContainer.style.backgroundColor = printer.backgroundColor;
+      printContainer.style.transform = `rotate(${printer.rotation}deg)`;
+
+      // Aplicando espaçamento entre linhas (line-height)
+      printContainer.style.lineHeight = `${printer.lineHeight}px`;
+
+      if (printer.labelBorder) {
+        printContainer.style.border = `1px solid ${printer.borderColor}`;
+      }
+      if (printer.cutLineEnabled) {
+        printContainer.style.borderStyle = 'dotted';
+      }
+      if (printer.customImageEnabled && tenantImage) {
+        const logo = document.createElement('img');
+        logo.src = tenantImage;
+        logo.style.position = 'absolute';
+        logo.style.width = `${printer.logoWidth}px`;
+        logo.style.height = `${printer.logoHeight}px`;
+        logo.style.top = `${printer.logoTop}px`;
+        logo.style.left = `${printer.logoLeft}px`;
+        logo.style.opacity = `${printer.imageOpacity}`;
+        printContainer.appendChild(logo);
+      }
+
+      // Adiciona etiquetas e controla a quebra de página
       for (let i = 0; i < quantity; i++) {
         const clone = componentRef.current?.cloneNode(true);
         if (clone) {
           const element = clone as HTMLElement;
-          element.style.height = '100%';
-          element.style.width = '100%';
-          printContainer.appendChild(element);
+          element.style.height = `${printer.labelHeight}mm`;
+          element.style.width = `${printer.labelWidth}mm`;
+
+          const pageContainer = document.createElement('div');
+          pageContainer.style.marginTop = `${printer.marginTop}mm`;
+          pageContainer.style.marginBottom = `${printer.marginBottom}mm`;
+          pageContainer.style.marginLeft = `${printer.marginLeft}mm`;
+          pageContainer.style.marginRight = `${printer.marginRight}mm`;
+          pageContainer.style.display = 'grid';
+          pageContainer.style.gridTemplateColumns = `repeat(${printer.labelsPerRow}, ${printer.labelWidth}mm)`;
+          pageContainer.style.gridTemplateRows = `repeat(${printer.labelsPerColumn}, ${printer.labelHeight}mm)`;
+          pageContainer.style.gap = `${printer.verticalSpacing}mm ${printer.horizontalSpacing}mm`;
+
+          pageContainer.appendChild(element);
+
+          if ((i + 1) % (printer.labelsPerRow * printer.labelsPerColumn) === 0) {
+            pageContainer.style.pageBreakAfter = 'always';
+          }
+
+          printContainer.appendChild(pageContainer);
         }
       }
 
@@ -239,7 +263,7 @@ export default function ProductLabelPrinter() {
   const handleAddField = () => {
     if (newField) {
       setFields([...fields, newField]);
-      setNewField(''); // Limpa o campo após adicionar
+      setNewField('');
     }
   };
 

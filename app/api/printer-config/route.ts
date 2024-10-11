@@ -73,6 +73,7 @@ export async function PUT(request: Request) {
       logoLeft,
       labelsPerRow = 3,
       labelsPerColumn = 7,
+      lineHeight, // Novo campo incluído para espaçamento entre linhas
     } = await request.json();
 
     // Atualiza a configuração existente pelo ID passado
@@ -112,6 +113,7 @@ export async function PUT(request: Request) {
         logoLeft,
         labelsPerRow,
         labelsPerColumn,
+        lineHeight, // Atualiza o campo de espaçamento entre linhas
       },
     });
 
@@ -200,6 +202,7 @@ export async function POST(request: Request) {
       logoLeft,
       labelsPerRow,
       labelsPerColumn,
+      lineHeight,
     } = await request.json();
 
     const newConfig = await prisma.printerConfig.create({
@@ -239,6 +242,7 @@ export async function POST(request: Request) {
         logoLeft,
         labelsPerRow,
         labelsPerColumn,
+        lineHeight,
       },
     });
 
