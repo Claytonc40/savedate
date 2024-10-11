@@ -179,9 +179,9 @@ export default function ProductLabelPrinter() {
       // Aplicando espaçamento entre linhas (line-height)
       printContainer.style.lineHeight = `${printer.lineHeight}px`;
 
-      if (printer.labelBorder) {
-        printContainer.style.border = `1px solid ${printer.borderColor}`;
-      }
+      // if (printer.labelBorder) {
+      //   printContainer.style.border = `1px solid ${printer.borderColor}`;
+      // }
       if (printer.cutLineEnabled) {
         printContainer.style.borderStyle = 'dotted';
       }
@@ -440,7 +440,7 @@ const ProductSelect = ({
       <SelectTrigger id="product-select">
         <SelectValue placeholder="Selecione um produto" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-meta-7 text-white">
         {products.map((product) => (
           <SelectItem key={product.id} value={product.id}>
             {product.name}
