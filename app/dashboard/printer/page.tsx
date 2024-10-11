@@ -323,7 +323,7 @@ export default function ProductLabelPrinter() {
                   <SelectTrigger>
                     <SelectValue placeholder="Selecione uma impressora" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-meta-7 text-white">
                     <SelectItem value="none">Selecione uma impressora</SelectItem>
                     {printerConfig.map((printer) => (
                       <SelectItem key={printer.id} value={printer.id}>
@@ -356,7 +356,7 @@ export default function ProductLabelPrinter() {
                   onChange={(e) => setNewField(e.target.value)}
                   placeholder="Digite o nome do campo"
                 />
-                <Button className="mt-2" onClick={handleAddField}>
+                <Button className="mt-2 text-white" onClick={handleAddField}>
                   Adicionar Campo
                 </Button>
               </div>
@@ -408,7 +408,7 @@ const CategorySelect = ({
       <SelectTrigger id="category-select">
         <SelectValue placeholder="Selecione uma categoria" />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="bg-meta-7 text-white">
         {categories.map((category) => (
           <SelectItem key={category.id} value={category.id}>
             {category.name}
