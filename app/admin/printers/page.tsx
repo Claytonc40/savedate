@@ -91,7 +91,6 @@ export default function PrinterConfigPage() {
       }
     } catch (error) {
       console.error('Erro ao buscar as configurações:', error);
-      toast.error('Falha ao carregar as configurações da impressora');
     } finally {
       setLoading(false);
     }
@@ -290,7 +289,7 @@ export default function PrinterConfigPage() {
 
       {/* Modal para adicionar nova configuração */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent>
+        <DialogContent className="bg-meta-6 text-white dark:bg-meta-7">
           <DialogHeader>
             <DialogTitle>Nova Configuração de Impressora</DialogTitle>
           </DialogHeader>
@@ -308,7 +307,7 @@ export default function PrinterConfigPage() {
 
       {/* Modal para confirmar exclusão */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent>
+        <DialogContent className="bg-meta-6 text-white dark:bg-meta-7">
           <DialogHeader>
             <DialogTitle>Excluir Configuração</DialogTitle>
           </DialogHeader>
