@@ -1,4 +1,5 @@
 'use client';
+
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -17,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Printer } from 'lucide-react';
+import { Plus, Printer } from 'lucide-react';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
@@ -80,10 +81,10 @@ interface PrinterConfig {
   logoLeft: number;
   labelsPerRow: number;
   labelsPerColumn: number;
-  lineHeight: number; // Adicionado para espaçamento entre linhas
+  lineHeight: number; // Adicionado campo de espaçamento entre linhas
 }
 
-export default function ProductLabelPrinter() {
+export default function Component() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -153,16 +154,13 @@ export default function ProductLabelPrinter() {
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
 
-      // Busca a configuração da impressora selecionada
       const printer = printerConfig.find((p) => p.id === selectedPrinter);
 
-      // Verifica se a impressora foi encontrada antes de continuar
       if (!printer) {
         toast.error('Erro: Impressora não encontrada');
         return printContainer;
       }
 
-      // Configurações da impressora selecionada
       printContainer.style.display = 'grid';
       printContainer.style.gridTemplateColumns = `repeat(${printer.labelsPerRow}, ${printer.labelWidth}mm)`;
       printContainer.style.gridTemplateRows = `repeat(${printer.labelsPerColumn}, ${printer.labelHeight}mm)`;
@@ -176,15 +174,13 @@ export default function ProductLabelPrinter() {
       printContainer.style.backgroundColor = printer.backgroundColor;
       printContainer.style.transform = `rotate(${printer.rotation}deg)`;
 
-      // Aplicando espaçamento entre linhas (line-height)
+      // Garantir que o espaçamento entre linhas seja aplicado na impressão
       printContainer.style.lineHeight = `${printer.lineHeight}px`;
 
-      // if (printer.labelBorder) {
-      //   printContainer.style.border = `1px solid ${printer.borderColor}`;
-      // }
       if (printer.cutLineEnabled) {
         printContainer.style.borderStyle = 'dotted';
       }
+
       if (printer.customImageEnabled && tenantImage) {
         const logo = document.createElement('img');
         logo.src = tenantImage;
@@ -197,13 +193,15 @@ export default function ProductLabelPrinter() {
         printContainer.appendChild(logo);
       }
 
-      // Adiciona etiquetas e controla a quebra de página
       for (let i = 0; i < quantity; i++) {
         const clone = componentRef.current?.cloneNode(true);
         if (clone) {
           const element = clone as HTMLElement;
           element.style.height = `${printer.labelHeight}mm`;
           element.style.width = `${printer.labelWidth}mm`;
+
+          // Aqui aplicamos o espaçamento entre linhas na etiqueta também durante a impressão
+          element.style.lineHeight = `${printer.lineHeight}px`;
 
           const pageContainer = document.createElement('div');
           pageContainer.style.marginTop = `${printer.marginTop}mm`;
@@ -235,7 +233,6 @@ export default function ProductLabelPrinter() {
       registerPrint();
     },
   });
-
   const registerPrint = async () => {
     const timestamp = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
     try {
@@ -268,13 +265,15 @@ export default function ProductLabelPrinter() {
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className={`container mx-auto bg-gray-3 p-4 dark:bg-boxdark`}>
       {isLoading ? (
         <Loading />
       ) : (
-        <div>
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Impressão de Validade</h1>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between rounded-lg bg-white p-4 shadow dark:bg-boxdark-2">
+            <h1 className="text-2xl font-bold text-black dark:text-bodydark">
+              Impressão de Validade
+            </h1>
           </div>
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -293,19 +292,17 @@ export default function ProductLabelPrinter() {
                       className="rounded-full object-cover"
                     />
                   )}
-                  <h3 className="product-name">
+                  <h3 className="product-name font-semibold text-black dark:text-bodydark">
                     {selectedProduct ? selectedProduct.name : 'Produto'}
                   </h3>
+                  <div className="bt-2 mb-2 w-full border-t border-stroke dark:border-strokedark"></div>
                   <div className="divider"></div>
-
                   {selectedProduct?.ambientDateTime && (
                     <p>Ambientação: {formatDateTime(selectedProduct.ambientDateTime)}</p>
                   )}
-
                   {selectedProduct?.expirationDate && (
                     <p>Validade: {formatDateTime(selectedProduct.expirationDate)}</p>
                   )}
-
                   {fields.map((field, index) => (
                     <p key={index}>{field} </p>
                   ))}
@@ -313,76 +310,100 @@ export default function ProductLabelPrinter() {
               </div>
             </Card>
 
-            <div>
-              <div className="mb-4">
-                <Label>Selecionar Impressora</Label>
-                <Select
-                  onValueChange={(value) => setSelectedPrinter(value)}
-                  defaultValue={printerConfig[0]?.id || ''}
+            <Card className="bg-white dark:bg-boxdark-2">
+              <div className="space-y-4 p-4">
+                <div>
+                  <Label className="text-black dark:text-bodydark">Selecionar Impressora</Label>
+                  <Select
+                    onValueChange={(value) => setSelectedPrinter(value)}
+                    defaultValue={printerConfig[0]?.id || ''}
+                  >
+                    <SelectTrigger className="border-stroke bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark">
+                      <SelectValue placeholder="Selecione uma impressora" />
+                    </SelectTrigger>
+                    <SelectContent className="border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+                      <SelectItem value="none">Selecione uma impressora</SelectItem>
+                      {printerConfig.map((printer) => (
+                        <SelectItem
+                          key={printer.id}
+                          value={printer.id}
+                          className="text-black dark:text-bodydark"
+                        >
+                          {printer.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <CategorySelect
+                  categories={categories}
+                  selectedCategory={selectedCategory}
+                  setSelectedCategory={setSelectedCategory}
+                />
+
+                {selectedCategory && filteredProducts.length > 0 && (
+                  <ProductSelect
+                    products={filteredProducts}
+                    selectedProduct={selectedProduct}
+                    setSelectedProduct={setSelectedProduct}
+                  />
+                )}
+
+                <div>
+                  <Label htmlFor="new-field" className="text-black dark:text-bodydark">
+                    Adicionar Novo Campo:
+                  </Label>
+                  <div className="flex items-center space-x-2">
+                    <Input
+                      id="new-field"
+                      value={newField}
+                      onChange={(e) => setNewField(e.target.value)}
+                      placeholder="Digite o nome do campo"
+                      className="border-stroke bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark"
+                    />
+                    <Button
+                      onClick={handleAddField}
+                      className="bg-success text-white hover:bg-success/90"
+                    >
+                      <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={() => setModalOpen(true)}
+                  className="w-full bg-success text-white hover:bg-success/90"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecione uma impressora" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-meta-7 text-white">
-                    <SelectItem value="none">Selecione uma impressora</SelectItem>
-                    {printerConfig.map((printer) => (
-                      <SelectItem key={printer.id} value={printer.id}>
-                        {printer.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <CategorySelect
-                categories={categories}
-                selectedCategory={selectedCategory}
-                setSelectedCategory={setSelectedCategory}
-              />
-
-              {selectedCategory && filteredProducts.length > 0 && (
-                <ProductSelect
-                  products={filteredProducts}
-                  selectedProduct={selectedProduct}
-                  setSelectedProduct={setSelectedProduct}
-                />
-              )}
-
-              <div className="mt-4">
-                <Label htmlFor="new-field">Adicionar Novo Campo:</Label>
-                <Input
-                  id="new-field"
-                  value={newField}
-                  onChange={(e) => setNewField(e.target.value)}
-                  placeholder="Digite o nome do campo"
-                />
-                <Button className="mt-2 text-white" onClick={handleAddField}>
-                  Adicionar Campo
+                  <Printer className="mr-2 h-4 w-4" /> Imprimir Etiqueta
                 </Button>
               </div>
-
-              <Button onClick={() => setModalOpen(true)} className="mt-4 w-full text-white">
-                <Printer className="mr-2 h-4 w-4" /> Imprimir Etiqueta
-              </Button>
-            </div>
+            </Card>
           </div>
 
           <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-            <DialogContent className="bg-graydark text-white">
+            <DialogContent className="bg-white dark:bg-boxdark">
               <DialogHeader>
-                <DialogTitle>Configurações de Impressão</DialogTitle>
+                <DialogTitle className="text-black dark:text-bodydark">
+                  Configurações de Impressão
+                </DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <Label htmlFor="quantity-input">Quantidade de Etiquetas</Label>
+                <Label htmlFor="quantity-input" className="text-black dark:text-bodydark">
+                  Quantidade de Etiquetas
+                </Label>
                 <Input
                   id="quantity-input"
                   type="number"
                   value={quantity.toString()}
                   onChange={(e) => setQuantity(Number(e.target.value))}
+                  className="border-stroke bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark"
                 />
               </div>
               <DialogFooter>
-                <Button onClick={handlePrint}>Confirmar Impressão</Button>
+                <Button onClick={handlePrint} className="bg-success text-white hover:bg-success/90">
+                  Confirmar Impressão
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -403,14 +424,23 @@ const CategorySelect = ({
   setSelectedCategory: (value: string | null) => void;
 }) => (
   <div>
-    <Label htmlFor="category-select">Selecione uma Categoria</Label>
+    <Label htmlFor="category-select" className="text-black dark:text-bodydark">
+      Selecione uma Categoria
+    </Label>
     <Select onValueChange={(value) => setSelectedCategory(value)}>
-      <SelectTrigger id="category-select">
+      <SelectTrigger
+        id="category-select"
+        className="border-stroke bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark"
+      >
         <SelectValue placeholder="Selecione uma categoria" />
       </SelectTrigger>
-      <SelectContent className="bg-meta-7 text-white">
+      <SelectContent className="border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
         {categories.map((category) => (
-          <SelectItem key={category.id} value={category.id}>
+          <SelectItem
+            key={category.id}
+            value={category.id}
+            className="text-black dark:text-bodydark"
+          >
             {category.name}
           </SelectItem>
         ))}
@@ -430,19 +460,24 @@ const ProductSelect = ({
   setSelectedProduct: (product: Product | null) => void;
 }) => (
   <div>
-    <Label htmlFor="product-select">Selecione um Produto</Label>
+    <Label htmlFor="product-select" className="text-black dark:text-bodydark">
+      Selecione um Produto
+    </Label>
     <Select
       onValueChange={(value) => {
         const foundProduct = products.find((p) => p.id === value);
         setSelectedProduct(foundProduct ?? null);
       }}
     >
-      <SelectTrigger id="product-select">
+      <SelectTrigger
+        id="product-select"
+        className="border-stroke bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark"
+      >
         <SelectValue placeholder="Selecione um produto" />
       </SelectTrigger>
-      <SelectContent className="bg-meta-7 text-white">
+      <SelectContent className="border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
         {products.map((product) => (
-          <SelectItem key={product.id} value={product.id}>
+          <SelectItem key={product.id} value={product.id} className="text-black dark:text-bodydark">
             {product.name}
           </SelectItem>
         ))}
