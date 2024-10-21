@@ -144,6 +144,17 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
               </li>
               <li>
                 <Link
+                  href="/dashboard/printer"
+                  className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-meta-5 dark:hover:bg-meta-5 ${
+                    pathname === '/dashboard/printer' && 'bg-meta-6 text-white'
+                  }`}
+                >
+                  <Printer />
+                  Impressão
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/admin/products"
                   className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-meta-5 dark:hover:bg-meta-5 ${
                     pathname === '/admin/products' && 'bg-meta-6 text-white'

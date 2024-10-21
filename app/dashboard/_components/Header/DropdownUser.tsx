@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { CgProfile } from 'react-icons/cg';
-import { FiSettings } from 'react-icons/fi';
 import { LuLogOut } from 'react-icons/lu';
 import { RiAdminFill, RiArrowDownWideLine } from 'react-icons/ri';
 
@@ -112,15 +111,6 @@ const DropdownUser = () => {
             >
               <CgProfile />
               Meu Perfil
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="/dashboard/settings"
-              className="flex items-center gap-3.5 text-sm font-medium duration-300 ease-in-out hover:text-meta-2 lg:text-base"
-            >
-              <FiSettings />
-              Configuração
             </Link>
           </li>
         </ul>
