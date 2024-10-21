@@ -18,8 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Plus, Printer } from 'lucide-react';
-import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 import { useEffect, useRef, useState } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import { toast } from 'sonner';
@@ -28,7 +29,23 @@ import Loading from '../_components/Loading';
 // Função para formatar data e hora
 const formatDateTime = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+
+  const formattedDate = date
+    .toLocaleDateString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+    .replace(/\//g, '-'); // Substitui a barra (/) por hífen (-)
+
+  const formattedTime = date.toLocaleTimeString('pt-BR', {
+    timeZone: 'America/Sao_Paulo',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  return `${formattedDate} ${formattedTime}`;
 };
 
 interface Category {
@@ -81,10 +98,27 @@ interface PrinterConfig {
   logoLeft: number;
   labelsPerRow: number;
   labelsPerColumn: number;
-  lineHeight: number; // Adicionado campo de espaçamento entre linhas
+  lineHeight: number;
+  titleFontSize: number;
+  titleFontFamily: string;
+  titleFontColor: string;
+  titleBoldText: boolean;
+  titleItalicText: boolean;
+  titleUnderlineText: boolean;
+  titleLineHeight: number;
+  bodyAlignment: 'left' | 'center' | 'right' | 'justify';
+  titleAlignment: 'left' | 'center' | 'right' | 'justify';
+  bodyFontSize: number;
+  bodyFontFamily: string;
+  bodyFontColor: string;
+  bodyBoldText: boolean;
+  bodyItalicText: boolean;
+  bodyUnderlineText: boolean;
+  bodyLineHeight: number;
 }
 
-export default function Component() {
+export default function PrintPage() {
+  const { data: session } = useSession();
   const [categories, setCategories] = useState<Category[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
@@ -96,21 +130,24 @@ export default function Component() {
   const [modalOpen, setModalOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [printerConfig, setPrinterConfig] = useState<PrinterConfig[]>([]);
-  const [selectedPrinter, setSelectedPrinter] = useState<string | null>(null);
+  const [selectedPrinter, setSelectedPrinter] = useState<PrinterConfig | null>(null);
   const componentRef = useRef<HTMLDivElement>(null);
   const [fields, setFields] = useState<string[]>([]);
   const [newField, setNewField] = useState('');
+  const [showPrintedBy, setShowPrintedBy] = useState(false);
+  const [showDateMake, setShowDateMake] = useState(false);
+  const [dateAgo, setDateAgo] = useState<string | null>(null);
 
+  // Carregar as configurações de impressora do banco de dados
   useEffect(() => {
     const fetchConfigs = async () => {
       setIsLoading(true);
       try {
         const response = await fetch('/api/printer-config');
         const data = await response.json();
-
         if (Array.isArray(data) && data.length > 0) {
           setPrinterConfig(data);
-          setSelectedPrinter(data[0].id);
+          setSelectedPrinter(data[0]); // Seleciona a primeira impressora por padrão
         } else {
           setPrinterConfig([]);
           setSelectedPrinter(null);
@@ -124,6 +161,7 @@ export default function Component() {
     fetchConfigs();
   }, []);
 
+  // Carregar produtos
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -149,38 +187,70 @@ export default function Component() {
     }
   }, [selectedCategory, products]);
 
+  const handlePrinterChange = (printerId: string) => {
+    const selected = printerConfig.find((printer) => printer.id === printerId);
+    if (selected) {
+      setSelectedPrinter(selected);
+    }
+  };
+
+  const registerPrint = async () => {
+    const timestamp = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+    try {
+      const response = await fetch('/api/print', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: selectedProduct?.id,
+          quantity,
+          lotNumber: batchNumber,
+          timestamp,
+        }),
+      });
+
+      if (response.ok) {
+        toast.success('Impressão registrada com sucesso!');
+      } else {
+        toast.error('Erro ao registrar a impressão');
+      }
+    } catch (error) {
+      toast.error('Erro ao registrar impressão');
+    }
+  };
+
   const handlePrint = useReactToPrint({
     content: () => {
       const printContainer = document.createElement('div');
       printContainer.id = 'print-container';
 
-      const printer = printerConfig.find((p) => p.id === selectedPrinter);
+      const printer = selectedPrinter;
 
       if (!printer) {
         toast.error('Erro: Impressora não encontrada');
         return printContainer;
       }
 
+      // Configurações de layout da etiqueta
       printContainer.style.display = 'grid';
-      printContainer.style.gridTemplateColumns = `repeat(${printer.labelsPerRow}, ${printer.labelWidth}mm)`;
-      printContainer.style.gridTemplateRows = `repeat(${printer.labelsPerColumn}, ${printer.labelHeight}mm)`;
-      printContainer.style.gap = `${printer.verticalSpacing}mm ${printer.horizontalSpacing}mm`;
+      printContainer.style.gridTemplateColumns = `repeat(${printer.labelsPerRow || 1}, ${printer.labelWidth || 100}mm)`;
+      printContainer.style.gridTemplateRows = `repeat(${printer.labelsPerColumn || 1}, ${printer.labelHeight || 50}mm)`;
+      printContainer.style.gap = `${printer.verticalSpacing || 0}mm ${printer.horizontalSpacing || 0}mm`;
 
-      printContainer.style.fontSize = `${printer.fontSize}px`;
-      printContainer.style.fontFamily = printer.fontFamily;
-      printContainer.style.color = printer.fontColor;
-      printContainer.style.fontWeight = printer.boldText ? 'bold' : 'normal';
-      printContainer.style.fontStyle = printer.italicText ? 'italic' : 'normal';
-      printContainer.style.backgroundColor = printer.backgroundColor;
-      printContainer.style.transform = `rotate(${printer.rotation}deg)`;
-
-      // Garantir que o espaçamento entre linhas seja aplicado na impressão
-      printContainer.style.lineHeight = `${printer.lineHeight}px`;
+      // Configurações de fonte e estilo do corpo da etiqueta
+      printContainer.style.fontSize = `${printer.bodyFontSize || 12}px`;
+      printContainer.style.fontFamily = printer.bodyFontFamily || 'Arial';
+      printContainer.style.color = printer.bodyFontColor || '#000000';
+      printContainer.style.fontWeight = printer.bodyBoldText ? 'bold' : 'normal';
+      printContainer.style.fontStyle = printer.bodyItalicText ? 'italic' : 'normal';
+      printContainer.style.backgroundColor = printer.backgroundColor || '#FFFFFF';
+      printContainer.style.transform = `rotate(${printer.rotation || 0}deg)`;
+      printContainer.style.lineHeight = `${printer.bodyLineHeight || 1.5}`; // Espaçamento do corpo
 
       if (printer.cutLineEnabled) {
         printContainer.style.borderStyle = 'dotted';
       }
 
+      // Configuração da imagem/logo
       if (printer.customImageEnabled && tenantImage) {
         const logo = document.createElement('img');
         logo.src = tenantImage;
@@ -193,6 +263,7 @@ export default function Component() {
         printContainer.appendChild(logo);
       }
 
+      // Clone o conteúdo que será impresso
       for (let i = 0; i < quantity; i++) {
         const clone = componentRef.current?.cloneNode(true);
         if (clone) {
@@ -200,8 +271,8 @@ export default function Component() {
           element.style.height = `${printer.labelHeight}mm`;
           element.style.width = `${printer.labelWidth}mm`;
 
-          // Aqui aplicamos o espaçamento entre linhas na etiqueta também durante a impressão
-          element.style.lineHeight = `${printer.lineHeight}px`;
+          // Aplicando o espaçamento entre linhas da configuração do banco de dados
+          element.style.lineHeight = `${printer.bodyLineHeight || 1.5}`; // Espaçamento entre linhas
 
           const pageContainer = document.createElement('div');
           pageContainer.style.marginTop = `${printer.marginTop}mm`;
@@ -233,29 +304,6 @@ export default function Component() {
       registerPrint();
     },
   });
-  const registerPrint = async () => {
-    const timestamp = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-    try {
-      const response = await fetch('/api/print', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          productId: selectedProduct?.id,
-          quantity,
-          lotNumber: batchNumber,
-          timestamp,
-        }),
-      });
-
-      if (response.ok) {
-        toast.success('Impressão registrada com sucesso!');
-      } else {
-        toast.error('Erro ao registrar a impressão');
-      }
-    } catch (error) {
-      toast.error('Erro ao registrar impressão');
-    }
-  };
 
   const handleAddField = () => {
     if (newField) {
@@ -263,9 +311,28 @@ export default function Component() {
       setNewField('');
     }
   };
-
+  // Função para mostrar a data de manipulação
+  const handleShowDateAgo = (checked: boolean | ((prevState: boolean) => boolean)) => {
+    setShowDateMake(checked);
+    if (checked) {
+      const currentDate = new Date()
+        .toLocaleDateString('pt-BR', {
+          timeZone: 'America/Sao_Paulo',
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        })
+        .replace(/\//g, '-');
+      const currentTime = new Date().toLocaleTimeString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+      setDateAgo(`${currentDate} ${currentTime}`);
+    }
+  };
   return (
-    <div className={`container mx-auto bg-gray-3 p-4 dark:bg-boxdark`}>
+    <div className="container mx-auto bg-gray-3 p-4 dark:bg-boxdark">
       {isLoading ? (
         <Loading />
       ) : (
@@ -276,53 +343,116 @@ export default function Component() {
             </h1>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <Card className="flex w-full items-center justify-center p-4">
-              <div
+          <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-2">
+            <div className="flex w-full items-center justify-center p-4">
+              <Card
                 ref={componentRef}
-                className="w-85 border-gray-400 mb-4 flex flex-col justify-between space-y-3 border-2 border-dashed p-4 text-left"
+                className="overflow-hidden"
+                style={{
+                  width: `${selectedPrinter?.labelWidth || 100}mm`,
+                  height: `${selectedPrinter?.labelHeight || 50}mm`,
+                  padding: `${selectedPrinter?.marginTop || 10}px ${selectedPrinter?.marginRight || 10}px ${selectedPrinter?.marginBottom || 10}px ${selectedPrinter?.marginLeft || 10}px`,
+                  backgroundColor: selectedPrinter?.backgroundColor || '#FFFFFF',
+                  border: selectedPrinter?.labelBorder
+                    ? `1px solid ${selectedPrinter?.borderColor || '#000000'}`
+                    : 'none',
+                  fontFamily: selectedPrinter?.bodyFontFamily || 'Arial',
+                  fontSize: `${selectedPrinter?.bodyFontSize || 12}px`,
+                  fontWeight: selectedPrinter?.bodyBoldText ? 'bold' : 'normal',
+                  fontStyle: selectedPrinter?.bodyItalicText ? 'italic' : 'normal',
+                  lineHeight: `${selectedPrinter?.bodyLineHeight || 1.5}`,
+                  color: selectedPrinter?.bodyFontColor || '#000000',
+                  textAlign: selectedPrinter?.bodyAlignment || 'left',
+                }}
               >
-                <div className="content-to-print flex flex-col items-start">
-                  {tenantImage && (
-                    <Image
-                      src={tenantImage}
-                      alt="Logo"
-                      width={printerConfig[0]?.logoWidth || 48}
-                      height={printerConfig[0]?.logoHeight || 48}
-                      className="rounded-full object-cover"
-                    />
-                  )}
-                  <h3 className="product-name font-semibold text-black dark:text-bodydark">
-                    {selectedProduct ? selectedProduct.name : 'Produto'}
-                  </h3>
-                  <div className="bt-2 mb-2 w-full border-t border-stroke dark:border-strokedark"></div>
-                  <div className="divider"></div>
-                  {selectedProduct?.ambientDateTime && (
-                    <p>Ambientação: {formatDateTime(selectedProduct.ambientDateTime)}</p>
-                  )}
-                  {selectedProduct?.expirationDate && (
-                    <p>Validade: {formatDateTime(selectedProduct.expirationDate)}</p>
-                  )}
-                  {fields.map((field, index) => (
-                    <p key={index}>{field} </p>
-                  ))}
-                </div>
-              </div>
-            </Card>
+                <h3
+                  className="product-name font-semibold text-black dark:text-bodydark"
+                  style={{
+                    fontSize: `${selectedPrinter?.titleFontSize || 16}px`,
+                    fontWeight: selectedPrinter?.titleBoldText ? 'bold' : 'normal',
+                    fontStyle: selectedPrinter?.titleItalicText ? 'italic' : 'normal',
+                    textDecoration: selectedPrinter?.titleUnderlineText ? 'underline' : 'none',
+                    lineHeight: `${selectedPrinter?.titleLineHeight || 1.5}`,
+                    fontFamily: selectedPrinter?.titleFontFamily || 'Arial',
+                    color: selectedPrinter?.titleFontColor || '#000000',
+                    textAlign: selectedPrinter?.titleAlignment || 'center',
+                  }}
+                >
+                  {selectedProduct ? selectedProduct.name : 'Produto'}
+                </h3>
+
+                <div className="bt-2 mb-2 w-full border-t border-stroke dark:border-strokedark"></div>
+                {showDateMake && dateAgo && (
+                  <p
+                    style={{
+                      textAlign: selectedPrinter?.bodyAlignment || 'left',
+                    }}
+                  >
+                    Manipulação: {dateAgo}
+                  </p>
+                )}
+                {selectedProduct?.ambientDateTime && (
+                  <p style={{ textAlign: selectedPrinter?.bodyAlignment || 'left' }}>
+                    Ambientação: {formatDateTime(selectedProduct.ambientDateTime)}
+                  </p>
+                )}
+                {selectedProduct?.expirationDate && (
+                  <p style={{ textAlign: selectedPrinter?.bodyAlignment || 'left' }}>
+                    Validade: {formatDateTime(selectedProduct.expirationDate)}
+                  </p>
+                )}
+                {fields.map((field, index) => (
+                  <p key={index} style={{ textAlign: selectedPrinter?.bodyAlignment || 'left' }}>
+                    {field}
+                  </p>
+                ))}
+                {showPrintedBy && session?.user?.name && (
+                  <p
+                    style={{
+                      textAlign: selectedPrinter?.bodyAlignment || 'left',
+                    }}
+                  >
+                    Impresso por: {session.user.name}
+                  </p>
+                )}
+              </Card>
+            </div>
 
             <Card className="bg-white dark:bg-boxdark-2">
               <div className="space-y-4 p-4">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="printed-by-switch" className="text-black dark:text-bodydark">
+                    Mostrar quem Imprimiu
+                  </Label>
+                  <Switch
+                    id="printed-by-switch"
+                    checked={showPrintedBy}
+                    onCheckedChange={setShowPrintedBy}
+                    className="bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark"
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="printed-by-switch" className="text-black dark:text-bodydark">
+                    Exibir data de Manipulação
+                  </Label>
+                  <Switch
+                    id="printed-by-switch"
+                    checked={showDateMake}
+                    onCheckedChange={handleShowDateAgo}
+                    className="bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark"
+                  />
+                </div>
+
                 <div>
                   <Label className="text-black dark:text-bodydark">Selecionar Impressora</Label>
                   <Select
-                    onValueChange={(value) => setSelectedPrinter(value)}
-                    defaultValue={printerConfig[0]?.id || ''}
+                    onValueChange={handlePrinterChange}
+                    defaultValue={selectedPrinter?.id || ''}
                   >
                     <SelectTrigger className="border-stroke bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark">
                       <SelectValue placeholder="Selecione uma impressora" />
                     </SelectTrigger>
                     <SelectContent className="border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
-                      <SelectItem value="none">Selecione uma impressora</SelectItem>
                       {printerConfig.map((printer) => (
                         <SelectItem
                           key={printer.id}

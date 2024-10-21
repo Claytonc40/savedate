@@ -69,12 +69,12 @@ export async function POST(request: Request) {
       const htmlContent = `
         <div style="font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; color: #333;">
           <div style="max-width: 600px; margin: auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-            <h2 style="text-align: center; color: #1a73e8;">BurgerMetrics - Redefinição de Senha</h2>
+            <h2 style="text-align: center; color: #1a73e8;"> Save-Date - Redefinição de Senha</h2>
             <p style="font-size: 16px; line-height: 1.6;">
               Olá, ${user.name}!,
             </p>
             <p style="font-size: 16px; line-height: 1.6;">
-              Você solicitou uma redefinição de senha para sua conta no BurgerMetrics. Para redefinir sua senha, clique no botão abaixo:
+              Você solicitou uma redefinição de senha para sua conta no  Save-Date. Para redefinir sua senha, clique no botão abaixo:
             </p>
             <div style="text-align: center; margin: 20px 0;">
               <a href="${resetLink}" style="background-color: #1a73e8; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-size: 16px;">

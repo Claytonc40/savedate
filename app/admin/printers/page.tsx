@@ -25,6 +25,7 @@ import FontSettings from './_components/FontSettings';
 import GeneralSettings from './_components/GeneralSettings';
 import ImageSettings from './_components/ImageSettings';
 import LabelSettings from './_components/LabelSettings';
+import PrinterConfigPreview from './_components/PrinterConfigPreview';
 
 type PrinterConfig = {
   id: string;
@@ -54,8 +55,8 @@ type PrinterConfig = {
   customImageEnabled: boolean;
   imagePosition: string;
   imageOpacity: number;
-  labelsPerRow: number; // Novo campo
-  labelsPerColumn: number; // Novo campo
+  labelsPerRow: number;
+  labelsPerColumn: number;
   numberOfLabelsPerPage: number;
   cutLineEnabled: boolean;
   useCustomMargins: boolean;
@@ -63,7 +64,23 @@ type PrinterConfig = {
   logoHeight: number;
   logoTop: number;
   logoLeft: number;
-  lineHeight: number; // Novo campo
+  lineHeight: number;
+  titleAlignment: 'center' | 'left' | 'right' | 'justify';
+  bodyAlignment: 'left' | 'right' | 'center' | 'justify';
+  titleFontSize: number;
+  titleFontFamily: string;
+  titleFontColor: string;
+  titleBoldText: boolean;
+  titleItalicText: boolean;
+  titleUnderlineText: boolean;
+  titleLineHeight: number;
+  bodyFontSize: number;
+  bodyFontFamily: string;
+  bodyFontColor: string;
+  bodyBoldText: boolean;
+  bodyItalicText: boolean;
+  bodyUnderlineText: boolean;
+  bodyLineHeight: number;
 };
 
 export default function PrinterConfigPage() {
@@ -98,10 +115,27 @@ export default function PrinterConfigPage() {
 
   const saveConfig = async (updatedConfig: PrinterConfig) => {
     try {
+      console.log('Salvando configuração:', updatedConfig);
       const response = await fetch('/api/printer-config', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedConfig),
+        body: JSON.stringify({
+          ...updatedConfig,
+          titleFontSize: updatedConfig.titleFontSize || 12,
+          titleFontFamily: updatedConfig.titleFontFamily || 'Arial',
+          titleFontColor: updatedConfig.titleFontColor || '#000000',
+          titleBoldText: updatedConfig.titleBoldText ?? false,
+          titleItalicText: updatedConfig.titleItalicText ?? false,
+          titleUnderlineText: updatedConfig.titleUnderlineText ?? false,
+          titleLineHeight: updatedConfig.titleLineHeight || 1.5,
+          bodyFontSize: updatedConfig.bodyFontSize || 12,
+          bodyFontFamily: updatedConfig.bodyFontFamily || 'Arial',
+          bodyFontColor: updatedConfig.bodyFontColor || '#000000',
+          bodyBoldText: updatedConfig.bodyBoldText ?? false,
+          bodyItalicText: updatedConfig.bodyItalicText ?? false,
+          bodyUnderlineText: updatedConfig.bodyUnderlineText ?? false,
+          bodyLineHeight: updatedConfig.bodyLineHeight || 1.5,
+        }),
       });
       if (!response.ok) throw new Error('Falha ao salvar a configuração');
       setConfig(updatedConfig);
@@ -112,10 +146,14 @@ export default function PrinterConfigPage() {
     }
   };
 
+  const handleConfigChange = (updatedConfig: PrinterConfig) => {
+    setConfig(updatedConfig);
+  };
+
   const createNewConfig = async () => {
     const newConfig: PrinterConfig = {
-      id: '', // ID será gerado pelo backend
-      tenantId: '', // O tenantId será atribuído no backend
+      id: '',
+      tenantId: '',
       name: newConfigName,
       paperSize: 'A4',
       labelWidth: 100,
@@ -141,8 +179,8 @@ export default function PrinterConfigPage() {
       customImageEnabled: false,
       imagePosition: 'Esquerda',
       imageOpacity: 1.0,
-      labelsPerRow: 3, // Padrão 3 etiquetas por linha
-      labelsPerColumn: 7, // Padrão 7 etiquetas por coluna
+      labelsPerRow: 3,
+      labelsPerColumn: 7,
       numberOfLabelsPerPage: 21,
       cutLineEnabled: true,
       useCustomMargins: true,
@@ -150,12 +188,28 @@ export default function PrinterConfigPage() {
       logoHeight: 50,
       logoTop: 10,
       logoLeft: 10,
-      lineHeight: 10,
+      lineHeight: 1.5,
+      titleAlignment: 'center',
+      titleFontSize: 16,
+      titleFontFamily: 'Arial',
+      titleFontColor: '#000000',
+      titleBoldText: false,
+      titleItalicText: false,
+      titleUnderlineText: false,
+      titleLineHeight: 1.5,
+      bodyAlignment: 'left',
+      bodyFontSize: 12,
+      bodyFontFamily: 'Arial',
+      bodyFontColor: '#000000',
+      bodyBoldText: false,
+      bodyItalicText: false,
+      bodyUnderlineText: false,
+      bodyLineHeight: 1.5,
     };
 
     try {
       const response = await fetch('/api/printer-config', {
-        method: 'POST', // POST para criar nova configuração
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newConfig),
       });
@@ -213,73 +267,116 @@ export default function PrinterConfigPage() {
 
   return (
     <>
-      <Card className="mx-auto w-full max-w-4xl">
+      <Card className="mx-auto w-full max-w-4xl bg-white dark:bg-boxdark">
+        <div className="mb-6">{config && <PrinterConfigPreview config={config} />}</div>
         <CardHeader>
-          <CardTitle>Configurações de Impressora</CardTitle>
-          <CardDescription>Selecione ou crie uma nova configuração de impressora.</CardDescription>
+          <CardTitle className="text-black dark:text-bodydark">
+            Configurações de Impressora
+          </CardTitle>
+          <CardDescription className="text-body dark:text-bodydark1">
+            Selecione ou crie uma nova configuração de impressora.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {configs.length > 0 ? (
-            <>
-              <div className="mb-4 flex items-center justify-between">
-                <div className="w-3/4">
-                  <label
-                    htmlFor="config-select"
-                    className="text-gray-700 block text-sm font-medium"
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <div className="mb-4 flex flex-col items-center justify-between sm:flex-row">
+                  <div className="mb-4 w-full sm:mb-0 sm:w-3/4">
+                    <label
+                      htmlFor="config-select"
+                      className="mb-2 block text-sm font-medium text-graydark dark:text-bodydark"
+                    >
+                      Selecione uma configuração existente
+                    </label>
+                    <Select
+                      onValueChange={handleSelectConfig}
+                      value={selectedConfigId ?? undefined}
+                    >
+                      <SelectTrigger
+                        id="config-select"
+                        className="border-stroke bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark"
+                      >
+                        <SelectValue placeholder="Selecione uma configuração" />
+                      </SelectTrigger>
+                      <SelectContent className="border-stroke bg-white dark:border-strokedark dark:bg-boxdark">
+                        {configs.map((config) => (
+                          <SelectItem key={config.id} value={config.id}>
+                            {config.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    onClick={() => setIsModalOpen(true)}
+                    className="w-full bg-success text-white hover:bg-success/90 sm:w-auto"
                   >
-                    Selecione uma configuração existente
-                  </label>
-                  <Select onValueChange={handleSelectConfig} value={selectedConfigId ?? undefined}>
-                    <SelectTrigger id="config-select">
-                      <SelectValue placeholder="Selecione uma configuração" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-meta-6 text-white">
-                      {configs.map((config) => (
-                        <SelectItem key={config.id} value={config.id}>
-                          {config.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    Nova Configuração
+                  </Button>
                 </div>
-                <Button onClick={() => setIsModalOpen(true)}>Nova Configuração</Button>
-              </div>
 
-              <Tabs defaultValue="general">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="general">Geral</TabsTrigger>
-                  <TabsTrigger value="label">Etiqueta</TabsTrigger>
-                  <TabsTrigger value="font">Fonte</TabsTrigger>
-                  <TabsTrigger value="barcode">Código de Barras</TabsTrigger>
-                  <TabsTrigger value="image">Imagem</TabsTrigger>
-                </TabsList>
-                <TabsContent value="general">
-                  <GeneralSettings config={config} onChange={setConfig} />
-                </TabsContent>
-                <TabsContent value="label">
-                  <LabelSettings config={config} onChange={setConfig} />
-                </TabsContent>
-                <TabsContent value="font">
-                  <FontSettings config={config} onChange={setConfig} />
-                </TabsContent>
-                <TabsContent value="barcode">
-                  <BarcodeSettings config={config} onChange={setConfig} />
-                </TabsContent>
-                <TabsContent value="image">
-                  <ImageSettings config={config} onChange={setConfig} />
-                </TabsContent>
-              </Tabs>
-              <div className="mt-6 flex justify-end space-x-4">
-                <Button onClick={() => config && saveConfig(config)}>Salvar Configuração</Button>
-                <Button variant="destructive" onClick={() => setIsDeleteModalOpen(true)}>
-                  Excluir Configuração
-                </Button>
+                <Tabs defaultValue="general" className="w-full">
+                  <TabsList className="flex flex-wrap gap-2 bg-gray-2 p-2 dark:bg-form-input">
+                    {['general', 'label', 'font', 'barcode', 'image'].map((tab) => (
+                      <TabsTrigger
+                        key={tab}
+                        value={tab}
+                        className="border-gray-300 flex-grow basis-[calc(50%-0.25rem)] border px-2 py-1 text-center data-[state=active]:bg-white dark:border-strokedark dark:data-[state=active]:bg-boxdark sm:w-auto sm:flex-grow-0 sm:basis-auto"
+                      >
+                        {tab === 'general' && 'Geral'}
+                        {tab === 'label' && 'Etiqueta'}
+                        {tab === 'font' && 'Fonte'}
+                        {tab === 'barcode' && 'Código de Barras'}
+                        {tab === 'image' && 'Imagem'}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  <div className="mt-20">
+                    <TabsContent value="general">
+                      <GeneralSettings config={config} onChange={handleConfigChange} />
+                    </TabsContent>
+                    <TabsContent value="label">
+                      <LabelSettings config={config} onChange={handleConfigChange} />
+                    </TabsContent>
+                    <TabsContent value="font">
+                      <FontSettings config={config} onChange={handleConfigChange} />
+                    </TabsContent>
+                    <TabsContent value="barcode">
+                      <BarcodeSettings config={config} onChange={handleConfigChange} />
+                    </TabsContent>
+                    <TabsContent value="image">
+                      <ImageSettings config={config} onChange={handleConfigChange} />
+                    </TabsContent>
+                  </div>
+                </Tabs>
+
+                <div className="mt-6 flex flex-col justify-end space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0">
+                  <Button
+                    onClick={() => config && saveConfig(config)}
+                    className="w-full bg-success text-white hover:bg-success/90 sm:w-auto"
+                  >
+                    Salvar Configuração
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setIsDeleteModalOpen(true)}
+                    className="w-full bg-danger text-white hover:bg-danger/90 sm:w-auto"
+                  >
+                    Excluir Configuração
+                  </Button>
+                </div>
               </div>
-            </>
+            </div>
           ) : (
             <div className="text-center">
-              <h2 className="text-xl font-bold">Nenhuma configuração encontrada</h2>
-              <Button onClick={() => setIsModalOpen(true)} className="mt-4 w-full">
+              <h2 className="text-xl font-bold text-black dark:text-bodydark">
+                Nenhuma configuração encontrada
+              </h2>
+              <Button
+                onClick={() => setIsModalOpen(true)}
+                className="mt-4 w-full bg-primary text-white hover:bg-primary/90"
+              >
                 Criar Configuração de Impressora
               </Button>
             </div>
@@ -287,36 +384,51 @@ export default function PrinterConfigPage() {
         </CardContent>
       </Card>
 
-      {/* Modal para adicionar nova configuração */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="bg-meta-6 text-white dark:bg-meta-7">
+        <DialogContent className="bg-white dark:bg-boxdark">
           <DialogHeader>
-            <DialogTitle>Nova Configuração de Impressora</DialogTitle>
+            <DialogTitle className="text-black dark:text-bodydark">
+              Nova Configuração de Impressora
+            </DialogTitle>
           </DialogHeader>
           <Input
             value={newConfigName}
             onChange={(e) => setNewConfigName(e.target.value)}
             placeholder="Nome da nova configuração"
-            className="mb-4"
+            className="mb-4 border-stroke bg-gray-2 text-black dark:border-form-strokedark dark:bg-form-input dark:text-bodydark"
           />
           <DialogFooter>
-            <Button onClick={createNewConfig}>Criar Configuração</Button>
+            <Button onClick={createNewConfig} className="bg-primary text-white hover:bg-primary/90">
+              Criar Configuração
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Modal para confirmar exclusão */}
       <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-        <DialogContent className="bg-meta-6 text-white dark:bg-meta-7">
+        <DialogContent className="bg-white dark:bg-boxdark">
           <DialogHeader>
-            <DialogTitle>Excluir Configuração</DialogTitle>
+            <DialogTitle className="text-black dark:text-bodydark">
+              Excluir Configuração
+            </DialogTitle>
           </DialogHeader>
-          <p>Tem certeza que deseja excluir esta configuração?</p>
+          <p className="text-body dark:text-bodydark1">
+            Tem certeza que deseja excluir esta configuração?
+          </p>
           <DialogFooter>
-            <Button variant="destructive" onClick={deleteConfig}>
+            <Button
+              variant="destructive"
+              onClick={deleteConfig}
+              className="bg-danger text-white hover:bg-danger/90"
+            >
               Excluir
             </Button>
-            <Button onClick={() => setIsDeleteModalOpen(false)}>Cancelar</Button>
+            <Button
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="bg-gray-2 text-black dark:bg-form-input dark:text-bodydark"
+            >
+              Cancelar
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
