@@ -20,6 +20,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import Loading from '../_components/Loading';
 import BarcodeSettings from './_components/BarcodeSettings';
 import FontSettings from './_components/FontSettings';
 import GeneralSettings from './_components/GeneralSettings';
@@ -263,7 +264,7 @@ export default function PrinterConfigPage() {
     }
   };
 
-  if (loading) return <div>Carregando...</div>;
+  if (loading) return <Loading />;
 
   return (
     <>

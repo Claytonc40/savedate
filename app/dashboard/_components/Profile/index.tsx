@@ -19,9 +19,8 @@ interface ProfileFormData {
 
 export default function ProfileEdit() {
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true); // Para exibir um loading enquanto os dados são carregados
+  const [loading, setLoading] = useState(true);
 
-  // Configuração do formulário usando react-hook-form
   const methods = useForm<ProfileFormData>();
   const {
     register,
@@ -30,7 +29,6 @@ export default function ProfileEdit() {
     formState: { errors },
   } = methods;
 
-  // Função de envio para o backend
   const onSubmit = async (values: ProfileFormData) => {
     if (values.newPassword && values.newPassword !== values.confirmPassword) {
       toast.error('As senhas não coincidem.');
@@ -39,12 +37,10 @@ export default function ProfileEdit() {
 
     try {
       const { name, email, newPassword } = values;
-
-      // Apenas incluir a nova senha se o campo estiver preenchido
       const dataToSend = {
         name,
         email,
-        ...(newPassword && { newPassword }), // Inclui newPassword apenas se preenchido
+        ...(newPassword && { newPassword }),
       };
 
       const response = await fetch(`/api/user`, {
@@ -52,7 +48,7 @@ export default function ProfileEdit() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(dataToSend), // Enviando os valores para a API
+        body: JSON.stringify(dataToSend),
       });
 
       if (response.ok) {
@@ -66,11 +62,10 @@ export default function ProfileEdit() {
     }
   };
 
-  // Função para buscar dados da sessão e preencher o formulário
   useEffect(() => {
     async function fetchUserData() {
       try {
-        const sessionResponse = await fetch('/api/auth/session'); // API do NextAuth para obter sessão
+        const sessionResponse = await fetch('/api/auth/session');
         const sessionData = await sessionResponse.json();
 
         if (sessionData && sessionData.user) {
@@ -80,14 +75,13 @@ export default function ProfileEdit() {
       } catch (error) {
         console.error('Erro ao buscar dados do usuário:', error);
       } finally {
-        setLoading(false); // Finalizar o loading quando os dados forem carregados
+        setLoading(false);
       }
     }
 
     fetchUserData();
   }, [setValue]);
 
-  // Função para lidar com a mudança do avatar (opcional)
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -100,34 +94,36 @@ export default function ProfileEdit() {
   };
 
   if (loading) {
-    return <Loading />; // Um simples loading enquanto os dados são carregados
+    return <Loading />;
   }
 
   return (
-    <Card className="mx-auto w-full max-w-2xl">
+    <Card className="mx-auto w-full max-w-2xl bg-white dark:bg-boxdark">
       <CardHeader>
-        <CardTitle>Editar Perfil</CardTitle>
-        <CardDescription>Atualize suas informações pessoais e senha.</CardDescription>
+        <CardTitle className="text-black dark:text-bodydark">Editar Perfil</CardTitle>
+        <CardDescription className="text-body dark:text-bodydark1">
+          Atualize suas informações pessoais e senha.
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        {/* Envolvendo o formulário dentro de FormProvider */}
         <FormProvider {...methods}>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-            {/* Campo de Nome */}
             <FormItem>
-              <FormLabel>Nome</FormLabel>
+              <FormLabel className="text-black dark:text-bodydark">Nome</FormLabel>
               <FormControl>
                 <Input
                   placeholder="Seu nome"
                   {...register('name', { required: 'Nome é obrigatório', minLength: 2 })}
+                  className="border-stroke bg-gray-2 text-black focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-bodydark"
                 />
               </FormControl>
-              {errors.name && <FormMessage>{errors.name.message}</FormMessage>}
+              {errors.name && (
+                <FormMessage className="text-danger">{errors.name.message}</FormMessage>
+              )}
             </FormItem>
 
-            {/* Campo de Email */}
             <FormItem>
-              <FormLabel>E-mail</FormLabel>
+              <FormLabel className="text-black dark:text-bodydark">E-mail</FormLabel>
               <FormControl>
                 <Input
                   placeholder="seu.email@exemplo.com"
@@ -138,24 +134,27 @@ export default function ProfileEdit() {
                       message: 'Insira um e-mail válido',
                     },
                   })}
+                  className="border-stroke bg-gray-2 text-black focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-bodydark"
                 />
               </FormControl>
-              {errors.email && <FormMessage>{errors.email.message}</FormMessage>}
+              {errors.email && (
+                <FormMessage className="text-danger">{errors.email.message}</FormMessage>
+              )}
             </FormItem>
 
-            <Separator />
+            <Separator className="bg-stroke dark:bg-strokedark" />
 
-            {/* Seção de Alteração de Senha */}
             <div>
-              <h3 className="text-lg font-medium">Mudar Senha (opcional)</h3>
-              <p className="text-sm text-muted-foreground">
+              <h3 className="text-lg font-medium text-black dark:text-bodydark">
+                Mudar Senha (opcional)
+              </h3>
+              <p className="text-sm text-body dark:text-bodydark1">
                 Deixe em branco se não deseja alterar sua senha.
               </p>
             </div>
 
-            {/* Campo de Nova Senha */}
             <FormItem>
-              <FormLabel>Nova Senha</FormLabel>
+              <FormLabel className="text-black dark:text-bodydark">Nova Senha</FormLabel>
               <FormControl>
                 <Input
                   type="password"
@@ -163,14 +162,16 @@ export default function ProfileEdit() {
                   {...register('newPassword', {
                     minLength: { value: 8, message: 'A senha deve ter pelo menos 8 caracteres.' },
                   })}
+                  className="border-stroke bg-gray-2 text-black focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-bodydark"
                 />
               </FormControl>
-              {errors.newPassword && <FormMessage>{errors.newPassword.message}</FormMessage>}
+              {errors.newPassword && (
+                <FormMessage className="text-danger">{errors.newPassword.message}</FormMessage>
+              )}
             </FormItem>
 
-            {/* Campo de Confirmação de Senha */}
             <FormItem>
-              <FormLabel>Confirme a Senha</FormLabel>
+              <FormLabel className="text-black dark:text-bodydark">Confirme a Senha</FormLabel>
               <FormControl>
                 <Input
                   type="password"
@@ -181,14 +182,18 @@ export default function ProfileEdit() {
                       message: 'A confirmação de senha deve ter pelo menos 8 caracteres.',
                     },
                   })}
+                  className="border-stroke bg-gray-2 text-black focus:border-primary dark:border-strokedark dark:bg-boxdark dark:text-bodydark"
                 />
               </FormControl>
               {errors.confirmPassword && (
-                <FormMessage>{errors.confirmPassword.message}</FormMessage>
+                <FormMessage className="text-danger">{errors.confirmPassword.message}</FormMessage>
               )}
             </FormItem>
 
-            <Button className="text-white" type="submit">
+            <Button
+              type="submit"
+              className="bg-primary text-white hover:bg-primary/90 dark:bg-primary dark:text-white dark:hover:bg-primary/90"
+            >
               Salvar
             </Button>
           </form>

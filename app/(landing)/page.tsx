@@ -41,7 +41,7 @@ export default function PricingPage() {
                 'Suporte Prioritário',
               ]}
             />
-            <PricingCard
+            {/* <PricingCard
               title="ENTERPRISE"
               price="Personalizado"
               features={[
@@ -53,7 +53,7 @@ export default function PricingPage() {
                 'SLA Garantido',
               ]}
               ctaText="ENTRAR EM CONTATO"
-            />
+            /> */}
           </div>
         </div>
       </main>

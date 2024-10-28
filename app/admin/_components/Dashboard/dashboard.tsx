@@ -1,178 +1,251 @@
 'use client';
 
+import Loading from '@/components/Loading/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { motion } from 'framer-motion';
-import { AlertTriangle, Package, Users } from 'lucide-react';
-import { useState } from 'react';
-import { FaQuestionCircle } from 'react-icons/fa';
-import Joyride from 'react-joyride'; // Importando o React Joyride
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { AlertCircle, Clock, Printer, Tag } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
-const Dashboard: React.FC = () => {
-  const [tourState, setTourState] = useState({
-    run: false, // Controla o estado do tour
-    steps: [
-      {
-        target: '.store-select', // Classe ou ID de destino para o primeiro passo
-        content:
-          'Selecione uma loja aqui. caso não tenha lojas cadastradas, Procure um Administrador.',
-        locale: { skip: 'Pular', next: 'Próximo', back: 'Voltar' },
-      },
-      {
-        target: '.date-picker', // Classe ou ID de destino para o segundo passo
-        content: 'Escolha uma data para gerar o relatório.',
-        locale: { skip: 'Pular', next: 'Próximo', back: 'Voltar' },
-      },
-      {
-        target: '.fetch-report-btn', // Classe ou ID de destino para o terceiro passo
-        content: 'Clique para buscar os dados do relatório.',
-        locale: { skip: 'Pular', next: 'Próximo', back: 'Voltar' },
-      },
-      {
-        target: '.card-stats', // Classe ou ID de destino para os cards de dados
-        content: 'Aqui estão os dados do relatório.',
-        locale: { skip: 'Pular', next: 'Próximo', back: 'Voltar', last: 'Finalizar' },
-      },
-      {
-        target: '.card-dados', // Classe ou ID de destino para os cards de dados
-        content:
-          'Caso não haja dados você pode clicar em "Importar dados" ao lado para inserir os dados manualmente.',
-        locale: { skip: 'Pular', next: 'Próximo', back: 'Voltar', last: 'Finalizar' },
-      },
-    ],
-  });
+interface DashboardData {
+  totalEtiquetasGeradas: number;
+  totalProdutosMonitorados: number;
+  produtosExpirando: number;
+  etiquetasPorCategoria: { nome: string; valor: number }[];
+  statusExpiracao: { nome: string; valor: number }[];
+  impressoesRecentes: { id: string; produto: string; quantidade: number; data: string }[];
+}
 
-  const startTour = () => {
-    setTourState((prevState) => ({ ...prevState, run: true }));
-  };
+const CORES = ['#3C50E0', '#80CAEE', '#10B981', '#FFA70B', '#FB5454'];
+
+export default function PainelAdministrador() {
+  const [dadosPainel, setDadosPainel] = useState<DashboardData | null>(null);
+  const [carregando, setCarregando] = useState(true);
+  const [intervaloData, setIntervaloData] = useState('semana');
+  const [termoPesquisa, setTermoPesquisa] = useState('');
+
+  useEffect(() => {
+    const buscarDadosPainel = async () => {
+      setCarregando(true);
+      try {
+        const response = await fetch(
+          `/api/admin/dashboard?intervalo=${intervaloData}&busca=${termoPesquisa}`,
+        );
+        if (!response.ok) throw new Error('Falha ao buscar dados do painel');
+        const data = await response.json();
+        setDadosPainel(data);
+      } catch (error) {
+        console.error('Erro ao buscar dados do painel:', error);
+      } finally {
+        setCarregando(false);
+      }
+    };
+
+    buscarDadosPainel();
+  }, [intervaloData, termoPesquisa]);
+
+  if (carregando) {
+    return <Loading />;
+  }
 
   return (
-    <div>
-      <div className="bg-gray-100 flex h-screen">
-        {/* Main Content */}
-        <div className="flex flex-1 flex-col overflow-hidden">
-          {/* Componente Joyride para o guia passo a passo */}
-          <Joyride
-            steps={tourState.steps}
-            continuous
-            showSkipButton
-            run={tourState.run} // Define se o tour está rodando ou não
-            styles={{
-              options: {
-                zIndex: 10000,
-              },
-            }}
-          />
-          {/* Botão flutuante no canto inferior direito */}
+    <div className="bg-gray-3 p-4 dark:bg-boxdark">
+      <h1 className="mb-6 text-3xl font-bold text-black dark:text-bodydark">
+        Painel do Sistema de Impressão de Etiquetas
+      </h1>
 
-          <motion.button
-            onClick={startTour}
-            className="fixed bottom-8 right-8 rounded-full bg-meta-7 p-3 text-white shadow-lg transition-colors duration-300 ease-in-out hover:bg-meta-10 focus:outline-none focus:ring-2 focus:ring-meta-6 focus:ring-offset-2 dark:bg-meta-10 dark:hover:bg-meta-6 dark:focus:ring-offset-boxdark"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <FaQuestionCircle size={24} />
-          </motion.button>
+      <div className="mb-6 flex flex-wrap gap-4">
+        <Select value={intervaloData} onValueChange={setIntervaloData}>
+          <SelectTrigger className="w-[180px] bg-white text-black dark:bg-boxdark-2 dark:text-bodydark">
+            <SelectValue placeholder="Selecionar intervalo de data" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="semana">Última Semana</SelectItem>
+            <SelectItem value="mes">Último Mês</SelectItem>
+            <SelectItem value="ano">Último Ano</SelectItem>
+          </SelectContent>
+        </Select>
 
-          {/* Dashboard Content */}
-          <main className="bg-gray-100 flex-1 overflow-y-auto overflow-x-hidden">
-            <div className="container mx-auto px-6 py-8">
-              <h3 className="text-gray-700 text-3xl font-medium">Dashboard</h3>
+        <Input
+          type="text"
+          placeholder="Buscar produtos ou categorias"
+          value={termoPesquisa}
+          onChange={(e) => setTermoPesquisa(e.target.value)}
+          className="w-full max-w-xs bg-white text-black dark:bg-boxdark-2 dark:text-bodydark"
+        />
+      </div>
 
-              <div className="mt-4">
-                <div className="-mx-6 flex flex-wrap">
-                  <div className="w-full px-6 sm:w-1/2 xl:w-1/3">
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total de Produtos</CardTitle>
-                        <Package className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">1,257</div>
-                        <p className="text-xs text-muted-foreground">
-                          +20% em relação ao mês passado
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  <div className="mt-4 w-full px-6 sm:mt-0 sm:w-1/2 xl:w-1/3">
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">
-                          Produtos Próximos do Vencimento
-                        </CardTitle>
-                        <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">23</div>
-                        <p className="text-xs text-muted-foreground">Necessitam atenção imediata</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                  <div className="mt-4 w-full px-6 sm:w-1/2 xl:mt-0 xl:w-1/3">
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Usuários Ativos</CardTitle>
-                        <Users className="h-4 w-4 text-muted-foreground" />
-                      </CardHeader>
-                      <CardContent>
-                        <div className="text-2xl font-bold">15</div>
-                        <p className="text-xs text-muted-foreground">
-                          3 novos usuários esta semana
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações Recentes</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center">
-                        <span className="mr-2 text-green-500">•</span>
-                        <p className="text-sm">João adicionou 50 novos produtos ao sistema</p>
-                        <span className="text-gray-500 ml-auto text-xs">2 min atrás</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="mr-2 text-yellow-500">•</span>
-                        <p className="text-sm">Maria atualizou as configurações de impressão</p>
-                        <span className="text-gray-500 ml-auto text-xs">1 hora atrás</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="mr-2 text-rose-500">•</span>
-                        <p className="text-sm">Sistema marcou 5 produtos como vencidos</p>
-                        <span className="text-gray-500 ml-auto text-xs">3 horas atrás</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="mt-8">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Ações em Lote</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex space-x-4">
-                      <Button>Imprimir Etiquetas Selecionadas</Button>
-                      <Button variant="outline">Marcar como Notificados</Button>
-                      <Button variant="destructive">Marcar como Vencidos</Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="bg-white dark:bg-boxdark-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black dark:text-bodydark">
+              Total de Etiquetas Geradas
+            </CardTitle>
+            <Printer className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black dark:text-bodydark">
+              {dadosPainel?.totalEtiquetasGeradas}
             </div>
-          </main>
-        </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-boxdark-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black dark:text-bodydark">
+              Produtos Monitorados
+            </CardTitle>
+            <Tag className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-black dark:text-bodydark">
+              {dadosPainel?.totalProdutosMonitorados}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-boxdark-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black dark:text-bodydark">
+              Produtos Expirando
+            </CardTitle>
+            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-danger">{dadosPainel?.produtosExpirando}</div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-boxdark-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-black dark:text-bodydark">
+              Tempo Médio para Expiração
+            </CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-success">30 dias</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-6 grid gap-6 md:grid-cols-2">
+        <Card className="bg-white dark:bg-boxdark-2">
+          <CardHeader>
+            <CardTitle className="text-black dark:text-bodydark">Etiquetas por Categoria</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={dadosPainel?.etiquetasPorCategoria}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="nome" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="valor" fill="#3C50E0" />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-boxdark-2">
+          <CardHeader>
+            <CardTitle className="text-black dark:text-bodydark">Status de Expiração</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={dadosPainel?.statusExpiracao}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="valor"
+                >
+                  {dadosPainel?.statusExpiracao.map((entrada, index) => (
+                    <Cell key={`cell-${index}`} fill={CORES[index % CORES.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-6">
+        <Card className="bg-white dark:bg-boxdark-2">
+          <CardHeader>
+            <CardTitle className="text-black dark:text-bodydark">
+              Impressões Recentes de Etiquetas
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-8">
+              {dadosPainel?.impressoesRecentes.map((impressao) => (
+                <div key={impressao.id} className="flex items-center">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium text-black dark:text-bodydark">
+                      {impressao.produto}
+                    </p>
+                    <p className="text-sm text-body dark:text-bodydark1">
+                      Impresso em: {impressao.data}
+                    </p>
+                  </div>
+                  <div className="ml-auto font-medium">{impressao.quantidade} etiquetas</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-6">
+        <Card className="bg-white dark:bg-boxdark-2">
+          <CardHeader>
+            <CardTitle className="text-black dark:text-bodydark">Ações do Administrador</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-4">
+              <Button
+                className="bg-meta-7 text-white hover:bg-meta-6"
+                onClick={() => (window.location.href = '/admin/products')}
+              >
+                Gerenciar Categorias e Produtos
+              </Button>
+              <Button
+                className="bg-meta-7 text-white hover:bg-secondary/90"
+                onClick={() => (window.location.href = '/admin/printers')}
+              >
+                Configurar Modelos de Etiquetas
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

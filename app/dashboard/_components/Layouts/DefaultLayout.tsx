@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState, useTransition } from 'react';
-import FooterDashboard from '../Footer';
 import Header from '../Header';
 import Loading from '../Loading';
 import Sidebar from '../Sidebar';
@@ -38,7 +37,7 @@ export default function DefaultLayout({ children }: { children: React.ReactNode 
         </main>
 
         {/* Footer */}
-        <FooterDashboard />
+        {/* <FooterDashboard /> */}
       </div>
     </div>
   );

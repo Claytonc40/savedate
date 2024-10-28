@@ -21,16 +21,43 @@ enum NotificationType {
 }
 
 model Tenant {
-  id           String        @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  image        String?
-  users        User[]
-  products     Product[]
-  categories   Category[]
-  subscription Subscription?
+  id                    String           @id @default(auto()) @map("_id") @db.ObjectId
+  name                  String
+  image                 String?
+  emailDefault          String?
+  phoneDefault          String?
+  street                String?          // Rua
+  number                String?          // Número
+  complement            String?          // Complemento
+  neighborhood          String?          // Bairro
+  city                  String?          // Cidade
+  state                 String?          // Estado
+  zipCode               String?          // CEP
+  autoRenew             Boolean?         // Renovação Automática
+  licenseExpirationDate DateTime?        // Expiração da Licença como DateTime
+  
+  users                 User[]
+  products              Product[]
+  categories            Category[]
+  subscription          Subscription?
 
-  Alert    Alert[]
-  PrintLog PrintLog[]
+  Alert                 Alert[]
+  PrintLog              PrintLog[]
+  PaymentHistory        PaymentHistory[]
+}
+
+
+model PaymentHistory {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId  String   @db.ObjectId
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  planId    String   @db.ObjectId
+  plan      Plan     @relation(fields: [planId], references: [id])
+  amount    Float
+  currency  String
+  status    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model User {
@@ -150,6 +177,8 @@ model Plan {
   updatedAt   DateTime @default(now())
 
   subscriptions Subscription[] // Relacionamento com múltiplas assinaturas
+
+  PaymentHistory PaymentHistory[]
 }
 
 model Subscription {
@@ -196,61 +225,62 @@ model Account {
 }
 
 model PrinterConfig {
-  id                      String   @id @default(auto()) @map("_id") @db.ObjectId
-  tenantId                String   @map("_tenantId") @db.ObjectId
-  name                    String   @map("_name")
-  paperSize               String?
-  labelWidth              Float?
-  labelHeight             Float?
-  marginTop               Float?
-  horizontalSpacing       Float?
-  verticalSpacing         Float?
-  marginBottom            Float?
-  marginLeft              Float?
-  marginRight             Float?
-  
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  tenantId          String  @map("_tenantId") @db.ObjectId
+  name              String  @map("_name")
+  paperSize         String?
+  labelWidth        Float?
+  labelHeight       Float?
+  marginTop         Float?
+  horizontalSpacing Float?
+  verticalSpacing   Float?
+  marginBottom      Float?
+  marginLeft        Float?
+  marginRight       Float?
+
   // Título
-  titleFontSize           Float?   // Tamanho da fonte do título
-  titleFontFamily         String?  // Família da fonte do título
-  titleFontColor          String?  // Cor da fonte do título
-  titleBoldText           Boolean? // Negrito no título
-  titleItalicText         Boolean? // Itálico no título
-  titleUnderline          Boolean? // Sublinhado no título
-  titleLineHeight         Float?   // Espaçamento entre linhas do título
-  titleAlignment          String?  // Alinhamento do título (left, center, right)
+  titleFontSize   Float? // Tamanho da fonte do título
+  titleFontFamily String? // Família da fonte do título
+  titleFontColor  String? // Cor da fonte do título
+  titleBoldText   Boolean? // Negrito no título
+  titleItalicText Boolean? // Itálico no título
+  titleUnderline  Boolean? // Sublinhado no título
+  titleLineHeight Float? // Espaçamento entre linhas do título
+  titleAlignment  String? // Alinhamento do título (left, center, right)
 
   // Corpo
-  bodyFontSize            Float?   // Tamanho da fonte do corpo
-  bodyFontFamily          String?  // Família da fonte do corpo
-  bodyFontColor           String?  // Cor da fonte do corpo
-  bodyBoldText            Boolean? // Negrito no corpo
-  bodyItalicText          Boolean? // Itálico no corpo
-  bodyUnderline           Boolean? // Sublinhado no corpo
-  bodyLineHeight          Float?   // Espaçamento entre linhas do corpo
-  bodyAlignment           String?  // Alinhamento do corpo (left, center, right)
+  bodyFontSize   Float? // Tamanho da fonte do corpo
+  bodyFontFamily String? // Família da fonte do corpo
+  bodyFontColor  String? // Cor da fonte do corpo
+  bodyBoldText   Boolean? // Negrito no corpo
+  bodyItalicText Boolean? // Itálico no corpo
+  bodyUnderline  Boolean? // Sublinhado no corpo
+  bodyLineHeight Float? // Espaçamento entre linhas do corpo
+  bodyAlignment  String? // Alinhamento do corpo (left, center, right)
 
-  rotation                Float?
-  barcodeEnabled          Boolean?
-  barcodeType             String?
-  barcodePosition         String?
-  labelBorder             Boolean?
-  borderColor             String?
-  backgroundColor         String?
-  customImageEnabled      Boolean?
-  imagePosition           String?
-  imageOpacity            Float?
-  numberOfLabelsPerPage   Int?
-  cutLineEnabled          Boolean?
-  useCustomMargins        Boolean?
-  logoWidth               Float?
-  logoHeight              Float?
-  logoTop                 Float?
-  logoLeft                Float?
-  labelsPerRow            Int?
-  labelsPerColumn         Int?
-  lineHeight              Float?
+  rotation              Float?
+  barcodeEnabled        Boolean?
+  barcodeType           String?
+  barcodePosition       String?
+  labelBorder           Boolean?
+  borderColor           String?
+  backgroundColor       String?
+  customImageEnabled    Boolean?
+  imagePosition         String?
+  imageOpacity          Float?
+  numberOfLabelsPerPage Int?
+  cutLineEnabled        Boolean?
+  useCustomMargins      Boolean?
 
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  imagePath       String?
+  logoWidth       Float?
+  logoHeight      Float?
+  logoTop         Float?
+  logoLeft        Float?
+  labelsPerRow    Int?
+  labelsPerColumn Int?
+  lineHeight      Float?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
-

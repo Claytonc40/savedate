@@ -8,7 +8,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import React from 'react';
 
 export default function ImageSettings({ config, onChange }: any) {
   const handleChange = (field: string, value: string | number | boolean) => {
@@ -28,10 +27,20 @@ export default function ImageSettings({ config, onChange }: any) {
       {config?.customImageEnabled && (
         <>
           <div className="space-y-2">
+            <Label htmlFor="imagePath">Caminho da Imagem</Label>
+            <Input
+              id="imagePath"
+              type="text"
+              value={config?.imagePath || '/images/logo.png'} // Caminho padrão
+              onChange={(e) => handleChange('imagePath', e.target.value)}
+              placeholder="Insira o caminho da imagem"
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="imagePosition">Posição da Imagem</Label>
             <Select
               onValueChange={(value) => handleChange('imagePosition', value)}
-              defaultValue={config?.imagePosition || ''}
+              defaultValue={config?.imagePosition || 'Center'}
             >
               <SelectTrigger id="imagePosition">
                 <SelectValue placeholder="Selecione a posição da imagem" />
@@ -72,26 +81,6 @@ export default function ImageSettings({ config, onChange }: any) {
                 type="number"
                 value={config?.logoHeight || 50}
                 onChange={(e) => handleChange('logoHeight', parseFloat(e.target.value))}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="logoTop">Posição Superior da Logo (mm)</Label>
-              <Input
-                id="logoTop"
-                type="number"
-                value={config?.logoTop || 10}
-                onChange={(e) => handleChange('logoTop', parseFloat(e.target.value))}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="logoLeft">Posição Esquerda da Logo (mm)</Label>
-              <Input
-                id="logoLeft"
-                type="number"
-                value={config?.logoLeft || 10}
-                onChange={(e) => handleChange('logoLeft', parseFloat(e.target.value))}
               />
             </div>
           </div>

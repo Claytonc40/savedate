@@ -53,14 +53,13 @@ export default function AdjustedExpiringTodayLog() {
     return () => window.removeEventListener('resize', checkScrollable);
   }, [expiringToday]);
 
-  // Use toLocaleDateString para formatar a data com base no fuso horário local
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
-      timeZone: 'America/Sao_Paulo', // Ajuste para o seu fuso horário
+      timeZone: 'America/Sao_Paulo',
     });
   };
 
@@ -73,8 +72,8 @@ export default function AdjustedExpiringTodayLog() {
   };
 
   return (
-    <Card className="flex h-full w-full flex-col dark:bg-black dark:text-meta-9">
-      <CardHeader className="bg-primary py-2 text-primary-foreground">
+    <Card className="flex h-full w-full flex-col bg-white dark:bg-boxdark">
+      <CardHeader className="bg-primary py-2 text-boxdark-2 dark:bg-boxdark-2 dark:text-white">
         <CardTitle className="flex items-center text-lg font-semibold">
           <AlertCircle className="mr-2 h-5 w-5" />
           Produtos Vencendo Hoje
@@ -86,26 +85,36 @@ export default function AdjustedExpiringTodayLog() {
             <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-primary"></div>
           </div>
         ) : error ? (
-          <div className="p-4 text-center text-rose-500">{error}</div>
+          <div className="p-4 text-center text-danger">{error}</div>
         ) : expiringToday.length === 0 ? (
-          <div className="p-4 text-center text-muted-foreground">Nenhum produto vencendo hoje.</div>
+          <div className="p-4 text-center text-body dark:text-bodydark">
+            Nenhum produto vencendo hoje.
+          </div>
         ) : (
           <div>
             <ScrollArea className="scroll-area h-[calc(100%-2rem)]">
-              <ul className="divide-gray-200 dark:divide-gray-700 divide-y">
+              <ul className="divide-y divide-stroke dark:divide-strokedark">
                 {expiringToday.map((product, index) => (
-                  <li key={index} className="p-3 transition-colors hover:bg-muted/50">
+                  <li
+                    key={index}
+                    className="p-3 transition-colors hover:bg-gray-2 dark:hover:bg-boxdark-2"
+                  >
                     <div className="flex items-start">
-                      <Package className="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                      <Package className="mr-3 mt-1 h-5 w-5 flex-shrink-0 text-body dark:text-bodydark" />
                       <div className="min-w-0 flex-grow">
-                        <p className="truncate font-medium">{product.productName}</p>
+                        <p className="truncate font-medium text-black dark:text-bodydark">
+                          {product.productName}
+                        </p>
                         <div className="mt-1 flex items-center space-x-2">
-                          <Badge variant="secondary" className="flex-shrink-0">
+                          <Badge
+                            variant="secondary"
+                            className="flex-shrink-0 bg-gray-2 text-body dark:bg-boxdark-2 dark:text-bodydark"
+                          >
                             {product.quantity} unidades
                           </Badge>
-                          <span className="truncate text-sm text-muted-foreground">
+                          <span className="truncate text-sm text-body dark:text-bodydark">
                             Vence em:{' '}
-                            <p className="inline-flex rounded-full bg-rose-100 px-2 text-xs font-semibold leading-5 text-rose-800">
+                            <p className="inline-flex rounded-full bg-danger/10 px-2 text-xs font-semibold leading-5 text-danger">
                               {formatDate(product.alertDate)}
                             </p>
                           </span>
@@ -123,11 +132,16 @@ export default function AdjustedExpiringTodayLog() {
                   variant="ghost"
                   size="icon"
                   onClick={() => handleScroll('up')}
-                  className="mb-1"
+                  className="mb-1 text-body hover:bg-gray-2 dark:text-bodydark dark:hover:bg-boxdark-2"
                 >
                   <ChevronUp className="h-4 w-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleScroll('down')}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleScroll('down')}
+                  className="text-body hover:bg-gray-2 dark:text-bodydark dark:hover:bg-boxdark-2"
+                >
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </div>

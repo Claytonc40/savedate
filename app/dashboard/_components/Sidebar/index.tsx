@@ -69,11 +69,11 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {
           <div className="flex items-center gap-2 text-white">
             {/* <FcExpired /> */}
             <Image
-              className="opacity-60"
+              className="ml-6 opacity-60"
               src="/images/logo.png"
               alt="DateGuard Logo"
-              width={80}
-              height={80}
+              width={40}
+              height={40}
             />
             <h3 className="text-lg font-bold">SAVE DATE</h3>
           </div>

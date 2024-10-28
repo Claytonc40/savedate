@@ -1,4 +1,5 @@
 import { Card } from '@/components/ui/card';
+import Image from 'next/image';
 import { FC, useState } from 'react';
 
 type PrinterConfig = {
@@ -40,6 +41,15 @@ type PrinterConfig = {
   titleItalicText: boolean;
   titleUnderlineText: boolean;
   titleLineHeight: number;
+
+  imagePath?: string; // Novo campo para o caminho da imagem
+  customImageEnabled?: boolean;
+  logoWidth?: number;
+  logoHeight?: number;
+  logoTop?: number;
+  logoLeft?: number;
+  imageOpacity?: number;
+  imagePosition?: string;
 };
 
 interface PrinterConfigPreviewProps {
@@ -53,12 +63,16 @@ const PrinterConfigPreview: FC<PrinterConfigPreviewProps> = ({ config }) => {
     'Vencimento: 17-10-2024 18:01',
   ]);
 
+  const imagePath = config?.customImageEnabled
+    ? config?.imagePath || '/images/logo.png'
+    : '/images/logo.png'; // Caminho da imagem ou logo padrão
+
   return (
     <div className="container mx-auto bg-gray-3 p-6 dark:bg-boxdark">
       <h1 className="mb-8 text-3xl font-bold text-black dark:text-bodydark">
         Pré-visualização da Etiqueta
       </h1>
-      <div className="flex items-center justify-center rounded-lg bg-gray-2 p-4 dark:bg-form-input">
+      <div className="relative flex items-center justify-center rounded-lg bg-gray-2 p-4 dark:bg-form-input">
         <Card
           className="overflow-hidden"
           style={{
@@ -77,6 +91,28 @@ const PrinterConfigPreview: FC<PrinterConfigPreviewProps> = ({ config }) => {
             color: config.bodyFontColor || '#000000',
           }}
         >
+          {/* Usa o componente Image do Next.js */}
+          {config.customImageEnabled && (
+            <div
+              style={{
+                position: 'absolute',
+                width: `${config?.logoWidth || 50}mm`,
+                height: `${config?.logoHeight || 50}mm`,
+                opacity: config?.imageOpacity || 1,
+                left: config?.imagePosition === 'Left' ? 0 : 'auto',
+                right: config?.imagePosition === 'Right' ? 0 : 'auto',
+                margin: config?.imagePosition === 'Center' ? 0 : 'auto',
+              }}
+            >
+              <Image
+                src={imagePath}
+                alt="Logo"
+                layout="fill"
+                objectFit="contain"
+                priority // Garante que a logo seja carregada rapidamente
+              />
+            </div>
+          )}
           {/* Exibindo o título */}
           <h3
             style={{

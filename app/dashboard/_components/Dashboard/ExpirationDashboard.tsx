@@ -61,26 +61,30 @@ export default function EnhancedExpirationDashboard() {
     (expiredNotDiscardedCount / expiredProductsCount) * 100 || 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rounded-lg bg-gray-3 p-4 dark:bg-boxdark">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard de Expiração</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-black dark:text-bodydark">
+          Dashboard de Expiração
+        </h1>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Produtos na Validade */}
-        <Card>
+        <Card className="bg-white dark:bg-boxdark-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Produtos na Validade</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black dark:text-bodydark">
+              Produtos na Validade
+            </CardTitle>
+            <CheckCircle2 className="h-4 w-4 text-meta-3" />
           </CardHeader>
           <CardContent>
             {loading ? (
-              <Skeleton className="h-[72px] bg-meta-6" />
+              <Skeleton className="h-[72px] bg-gray-2 dark:bg-form-input" />
             ) : (
               <>
-                <div className="text-2xl font-bold text-green-500">{validProductsCount}</div>
-                <Progress value={validProductsPercentage} className="mt-2 bg-green-500" />
-                <p className="mt-2 text-xs text-muted-foreground">
+                <div className="text-2xl font-bold text-meta-3">{validProductsCount}</div>
+                <Progress value={validProductsPercentage} className="mt-2 bg-meta-3" />
+                <p className="mt-2 text-xs text-body dark:text-bodydark1">
                   {validProductsPercentage.toFixed(1)}% do total de produtos
                 </p>
               </>
@@ -89,27 +93,47 @@ export default function EnhancedExpirationDashboard() {
         </Card>
 
         {/* Etiquetas Impressas */}
-        <Card>
+        <Card className="bg-white dark:bg-boxdark-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Etiquetas Impressas</CardTitle>
-            <Printer className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black dark:text-bodydark">
+              Etiquetas Impressas
+            </CardTitle>
+            <Printer className="h-4 w-4 text-meta-6" />
           </CardHeader>
           <CardContent>
             {loading ? (
-              <Skeleton className="h-[72px] bg-meta-7" />
+              <Skeleton className="h-[72px] bg-gray-2 dark:bg-form-input" />
             ) : (
               <Tabs defaultValue="week" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="week">Esta Semana</TabsTrigger>
-                  <TabsTrigger value="month">Este Mês</TabsTrigger>
+                <TabsList className="grid w-full grid-cols-2 bg-gray-2 dark:bg-form-input">
+                  <TabsTrigger
+                    value="week"
+                    className="text-black data-[state=active]:bg-white dark:text-bodydark dark:data-[state=active]:bg-boxdark"
+                  >
+                    Esta Semana
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="month"
+                    className="text-black data-[state=active]:bg-white dark:text-bodydark dark:data-[state=active]:bg-boxdark"
+                  >
+                    Este Mês
+                  </TabsTrigger>
                 </TabsList>
                 <TabsContent value="week" className="mt-2">
-                  <div className="text-2xl font-bold">{labelsPrinted.week}</div>
-                  <p className="text-xs text-muted-foreground">etiquetas impressas esta semana</p>
+                  <div className="text-2xl font-bold text-black dark:text-bodydark">
+                    {labelsPrinted.week}
+                  </div>
+                  <p className="text-xs text-body dark:text-bodydark1">
+                    etiquetas impressas esta semana
+                  </p>
                 </TabsContent>
                 <TabsContent value="month" className="mt-2">
-                  <div className="text-2xl font-bold">{labelsPrinted.month}</div>
-                  <p className="text-xs text-muted-foreground">etiquetas impressas este mês</p>
+                  <div className="text-2xl font-bold text-black dark:text-bodydark">
+                    {labelsPrinted.month}
+                  </div>
+                  <p className="text-xs text-body dark:text-bodydark1">
+                    etiquetas impressas este mês
+                  </p>
                 </TabsContent>
               </Tabs>
             )}
@@ -117,19 +141,21 @@ export default function EnhancedExpirationDashboard() {
         </Card>
 
         {/* Vencido sem Descarte */}
-        <Card>
+        <Card className="bg-white dark:bg-boxdark-2">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Vencido sem Descarte</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-black dark:text-bodydark">
+              Vencido sem Descarte
+            </CardTitle>
+            <AlertCircle className="h-4 w-4 text-meta-1" />
           </CardHeader>
           <CardContent>
             {loading ? (
-              <Skeleton className="h-[72px] bg-meta-7" />
+              <Skeleton className="h-[72px] bg-gray-2 dark:bg-form-input" />
             ) : (
               <>
-                <div className="text-2xl font-bold text-rose-500">{expiredNotDiscardedCount}</div>
-                <Progress value={expiredNotDiscardedPercentage} className="mt-2 bg-rose-500" />
-                <p className="mt-2 text-xs text-muted-foreground">
+                <div className="text-2xl font-bold text-meta-1">{expiredNotDiscardedCount}</div>
+                <Progress value={expiredNotDiscardedPercentage} className="mt-2 bg-meta-1" />
+                <p className="mt-2 text-xs text-body dark:text-bodydark1">
                   {expiredNotDiscardedPercentage.toFixed(1)}% dos produtos vencidos
                 </p>
               </>
@@ -138,41 +164,46 @@ export default function EnhancedExpirationDashboard() {
         </Card>
       </div>
 
-      <Card>
+      <Card className="bg-white dark:bg-boxdark-2">
         <CardHeader>
-          <CardTitle>Visão Geral de Produtos</CardTitle>
-          <CardDescription>Distribuição de produtos válidos e vencidos</CardDescription>
+          <CardTitle className="text-black dark:text-bodydark">Visão Geral de Produtos</CardTitle>
+          <CardDescription className="text-body dark:text-bodydark1">
+            Distribuição de produtos válidos e vencidos
+          </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <Skeleton className="h-[200px] bg-meta-7" />
+            <Skeleton className="h-[200px] bg-gray-2 dark:bg-form-input" />
           ) : (
             <div className="space-y-4">
               <div className="flex items-center">
-                <div className="w-16 text-sm font-medium">Válidos</div>
+                <div className="w-16 text-sm font-medium text-black dark:text-bodydark">
+                  Válidos
+                </div>
                 <div className="w-full">
                   <div className="flex items-center">
-                    <Progress value={validProductsPercentage} className="h-2 flex-1 bg-green-500" />
-                    <span className="ml-2 text-sm">{validProductsPercentage.toFixed(1)}%</span>
+                    <Progress value={validProductsPercentage} className="h-2 flex-1 bg-meta-3" />
+                    <span className="ml-2 text-sm text-black dark:text-bodydark">
+                      {validProductsPercentage.toFixed(1)}%
+                    </span>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-xs text-body dark:text-bodydark1">
                     {validProductsCount} produtos
                   </p>
                 </div>
               </div>
               <div className="flex items-center">
-                <div className="w-16 text-sm font-medium">Vencidos</div>
+                <div className="w-16 text-sm font-medium text-black dark:text-bodydark">
+                  Vencidos
+                </div>
                 <div className="w-full">
                   <div className="flex items-center">
-                    <Progress
-                      value={expiredProductsPercentage}
-                      className="h-2 flex-1 bg-rose-500"
-                    />
-                    <span className="ml-2 text-sm text-rose-500">
+                    <Progress value={expiredProductsPercentage} className="h-2 flex-1 bg-meta-1" />
+                    <span className="ml-2 text-sm text-meta-1">
                       {expiredProductsPercentage.toFixed(1)}%
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-xs text-body dark:text-bodydark1">
                     {expiredProductsCount} produtos
                   </p>
                 </div>
